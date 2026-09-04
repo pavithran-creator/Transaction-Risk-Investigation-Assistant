@@ -265,6 +265,65 @@ async def test_get_attention_exception_handling(monkeypatch):
     assert "traceback" not in str(body).lower()
 
 
+@pytest.mark.anyio
+async def test_get_investigation_before_upload():
+    """GET /api/investigation before uploading returns completed status with fallback explanation."""
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        resp = await client.get("/api/investigation")
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["status"] == "completed"
+    assert body["explanation"]["attention_level"] == "INSUFFICIENT_EVIDENCE"
+    assert body["explanation"]["valid"] is False
+
+
+@pytest.mark.anyio
+async def test_get_investigation_after_upload():
+    """GET /api/investigation after uploading returns explanation response."""
+    csv_bytes = (FIXTURES / "valid_single_customer.csv").read_bytes()
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        upload_resp = await client.post(
+            "/api/upload",
+            files={"file": ("valid_single_customer.csv", csv_bytes, "text/csv")},
+        )
+        assert upload_resp.status_code == 200
+
+        inv_resp = await client.get("/api/investigation")
+        assert inv_resp.status_code == 200
+        body = inv_resp.json()
+        assert body["status"] == "completed"
+        assert body["customer_id"] == "CUST001"
+        explanation = body["explanation"]
+        assert "attention_level" in explanation
+        assert "safety_statement" in explanation
+        assert "risk_score" not in explanation
+        assert "fraud_probability" not in explanation
+
+
+@pytest.mark.anyio
+async def test_get_investigation_exception_handling(monkeypatch):
+    """GET /api/investigation returns structured 500 JSON without exposing stack trace when an exception occurs."""
+
+    def mock_raise(*args, **kwargs):
+        raise ValueError("Internal test failure")
+
+    monkeypatch.setattr("app.get_current_dataset", mock_raise)
+
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        resp = await client.get("/api/investigation")
+
+    assert resp.status_code == 500
+    body = resp.json()
+    assert body["status"] == "error"
+    assert "unexpected error" in body["message"].lower()
+    assert "ValueError" not in str(body)
+    assert "traceback" not in str(body).lower()
+
+
+
 
 
 

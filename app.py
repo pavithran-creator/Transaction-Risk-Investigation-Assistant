@@ -5,6 +5,7 @@ import uvicorn
 from src.analytics.attention_engine import evaluate_attention
 from src.analytics.baseline_calculator import build_customer_baseline
 from src.analytics.csv_validator import validate_csv
+from src.analytics.investigation_service import generate_investigation_explanation
 from src.analytics.state import clear_current_dataset, get_current_dataset, set_current_dataset
 from src.analytics.transaction_loader import load_dataset_from_csv_bytes
 from src.models.transaction import MAX_UPLOAD_SIZE_BYTES, error_response
@@ -254,6 +255,36 @@ def get_attention():
                 "message": "An unexpected error occurred while generating the attention assessment.",
                 "customer_id": None,
                 "assessment": evaluate_attention(None).model_dump(mode="json"),
+            },
+        )
+
+
+@app.get("/api/investigation")
+def get_investigation():
+    """
+    Generate grounded Gemini investigation explanation for the loaded transaction history.
+
+    Passes deterministic evidence to Gemini to produce investigator-oriented explanation.
+    """
+    try:
+        dataset = get_current_dataset()
+        explanation = generate_investigation_explanation(dataset)
+        return JSONResponse(
+            status_code=200,
+            content={
+                "status": "completed",
+                "customer_id": explanation.customer_id,
+                "explanation": explanation.model_dump(mode="json"),
+            },
+        )
+    except Exception:
+        return JSONResponse(
+            status_code=500,
+            content={
+                "status": "error",
+                "message": "An unexpected error occurred while generating the investigation explanation.",
+                "customer_id": None,
+                "explanation": None,
             },
         )
 
