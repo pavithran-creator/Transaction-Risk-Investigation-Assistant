@@ -13,10 +13,12 @@ from src.models.baseline import (
     ActivityStats,
     AmountStatistics,
     ChannelUsage,
+    CustomerBaseline,
+    DateRangeModel,
     FrequencyStatistics,
     PayeeUsage,
 )
-from src.models.transaction import Transaction
+from src.models.transaction import Transaction, TransactionDataset
 
 WEEKDAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 
@@ -187,5 +189,57 @@ def calculate_frequency_statistics(transactions: List[Transaction]) -> Optional[
         max_transactions_in_day=max_daily,
         min_transactions_in_active_day=min_daily,
     )
+
+
+def build_customer_baseline(dataset: Optional[TransactionDataset]) -> Optional[CustomerBaseline]:
+    """
+    Build a complete CustomerBaseline profile from a loaded TransactionDataset.
+
+    Consumes the Phase 3 TransactionDataset directly without re-parsing CSV.
+    Returns None if dataset is empty or invalid.
+    """
+    if not dataset or dataset.transaction_count == 0:
+        return None
+
+    cust_id = dataset.customer_id or (dataset.customer_ids[0] if dataset.customer_ids else "UNKNOWN")
+    transactions = dataset.transactions
+
+    # Amounts
+    amounts = [t.amount for t in transactions]
+    amount_stats = calculate_amount_statistics(amounts)
+
+    # Channels
+    channel_usage = calculate_channel_usage(transactions)
+
+    # Payees
+    payee_usage = calculate_payee_usage(transactions)
+
+    # Temporal (Hourly & Weekday)
+    hourly_act = calculate_hourly_activity(transactions)
+    weekday_act = calculate_weekday_activity(transactions)
+
+    # Frequency
+    freq_stats = calculate_frequency_statistics(transactions)
+
+    # Date range
+    date_range_model = None
+    if dataset.date_range and dataset.date_range.earliest and dataset.date_range.latest:
+        date_range_model = DateRangeModel(
+            start=dataset.date_range.earliest,
+            end=dataset.date_range.latest,
+        )
+
+    return CustomerBaseline(
+        customer_id=cust_id,
+        transaction_count=dataset.transaction_count,
+        date_range=date_range_model,
+        amount_statistics=amount_stats,
+        channel_usage=channel_usage,
+        payee_usage=payee_usage,
+        hourly_activity=hourly_act,
+        weekday_activity=weekday_act,
+        frequency=freq_stats,
+    )
+
 
 
