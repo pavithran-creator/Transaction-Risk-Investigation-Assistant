@@ -5,7 +5,9 @@ This module defines the canonical transaction schema, supported channels,
 and Pydantic response models for the CSV upload/validation API.
 """
 
-from typing import List, Optional
+from datetime import datetime
+from typing import Any, Dict, List, Optional
+from pydantic import BaseModel, Field, field_validator
 
 # ---------------------------------------------------------------------------
 # Canonical required columns for a valid transaction CSV
@@ -39,10 +41,41 @@ MAX_UPLOAD_SIZE_BYTES = 10 * 1024 * 1024  # 10 MB
 
 
 # ---------------------------------------------------------------------------
-# Pydantic-free plain dataclass-style response helpers
-# (kept simple to avoid adding extra dependencies)
+# Transaction Domain Model
 # ---------------------------------------------------------------------------
+class Transaction(BaseModel):
+    """Represents a validated single transaction within the system."""
 
+    transaction_id: str = Field(..., description="Unique transaction ID")
+    customer_id: str = Field(..., description="Customer ID associated with transaction")
+    timestamp: datetime = Field(..., description="Chronological timestamp of transaction")
+    description: str = Field(..., description="Transaction description/narration")
+    payee: str = Field(..., description="Receiver / Payee identifier or name")
+    amount: float = Field(..., gt=0, description="Transaction amount (must be positive)")
+    channel: str = Field(..., description="Payment channel (UPI, NEFT, IMPS, etc.)")
+    extra_fields: Dict[str, Any] = Field(default_factory=dict, description="Preserved extra metadata fields")
+
+    @field_validator("transaction_id", "customer_id", "description", "payee")
+    @classmethod
+    def validate_non_empty_str(cls, v: str, info) -> str:
+        if not v or not v.strip():
+            raise ValueError(f"{info.field_name} must not be empty")
+        return v.strip()
+
+    @field_validator("channel")
+    @classmethod
+    def validate_channel(cls, v: str) -> str:
+        if not v or not v.strip():
+            raise ValueError("channel must not be empty")
+        channel_upper = v.strip().upper()
+        if channel_upper not in SUPPORTED_CHANNELS:
+            raise ValueError(f"Unsupported channel '{v}'. Supported channels: {sorted(list(SUPPORTED_CHANNELS))}")
+        return channel_upper
+
+
+# ---------------------------------------------------------------------------
+# Response helpers
+# ---------------------------------------------------------------------------
 def success_response(
     transaction_count: int,
     customer_count: int,
@@ -66,3 +99,4 @@ def error_response(errors: List[str]) -> dict:
         "valid": False,
         "errors": errors,
     }
+
