@@ -156,3 +156,23 @@ def test_transaction_dataset_multiple_customers():
     assert ds.customer_ids == ["CUST100", "CUST200"]
     assert ds.customer_id is None
 
+
+def test_transaction_ordering_and_deterministic_secondary_sort():
+    dt1 = datetime(2026, 1, 15, 10, 0, 0)
+    dt2 = datetime(2026, 1, 16, 12, 0, 0)
+
+    # Insert out of order with identical timestamps for two transactions
+    t_later = Transaction(transaction_id="TXN003", customer_id="C1", timestamp=dt2, description="D", payee="P", amount=10, channel="UPI")
+    t_equal_b = Transaction(transaction_id="TXN002", customer_id="C1", timestamp=dt1, description="D", payee="P", amount=10, channel="UPI")
+    t_equal_a = Transaction(transaction_id="TXN001", customer_id="C1", timestamp=dt1, description="D", payee="P", amount=10, channel="UPI")
+
+    ds = TransactionDataset(transactions=[t_later, t_equal_b, t_equal_a])
+
+    # Should be sorted chronologically, then by transaction_id
+    assert [t.transaction_id for t in ds.transactions] == ["TXN001", "TXN002", "TXN003"]
+    assert ds.earliest_timestamp == dt1
+    assert ds.latest_timestamp == dt2
+    assert ds.date_range.earliest == dt1
+    assert ds.date_range.latest == dt2
+
+

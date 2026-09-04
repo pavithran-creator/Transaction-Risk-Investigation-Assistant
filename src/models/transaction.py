@@ -88,6 +88,18 @@ class TransactionDataset(BaseModel):
 
     transactions: List[Transaction] = Field(default_factory=list, description="List of validated Transaction objects")
 
+    def sort_transactions(self) -> List[Transaction]:
+        """
+        Sort transactions chronologically by timestamp.
+        Uses transaction_id as secondary deterministic sort key when timestamps are equal.
+        """
+        self.transactions.sort(key=lambda t: (t.timestamp, t.transaction_id))
+        return self.transactions
+
+    def model_post_init(self, __context: Any) -> None:
+        """Automatically ensure transactions are sorted chronologically upon initialization."""
+        self.sort_transactions()
+
     @property
     def transaction_count(self) -> int:
         """Returns total count of stored transactions."""
@@ -107,15 +119,29 @@ class TransactionDataset(BaseModel):
         return None
 
     @property
+    def earliest_timestamp(self) -> Optional[datetime]:
+        """Returns earliest timestamp in the dataset."""
+        if not self.transactions:
+            return None
+        return min(t.timestamp for t in self.transactions)
+
+    @property
+    def latest_timestamp(self) -> Optional[datetime]:
+        """Returns latest timestamp in the dataset."""
+        if not self.transactions:
+            return None
+        return max(t.timestamp for t in self.transactions)
+
+    @property
     def date_range(self) -> Optional[DateRange]:
         """Returns DateRange containing earliest and latest timestamps, or None if empty."""
         if not self.transactions:
             return None
-        timestamps = [t.timestamp for t in self.transactions]
         return DateRange(
-            earliest=min(timestamps),
-            latest=max(timestamps),
+            earliest=self.earliest_timestamp,
+            latest=self.latest_timestamp,
         )
+
 
 
 
