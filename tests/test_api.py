@@ -123,10 +123,42 @@ async def test_upload_empty_file():
 
 
 @pytest.mark.anyio
-async def test_upload_no_file():
-    """POST /api/upload without a file returns 422 (FastAPI validation)."""
+async def test_get_baseline_before_upload():
+    """GET /api/baseline before uploading returns status empty."""
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as client:
-        resp = await client.post("/api/upload")
-    assert resp.status_code == 422
+        resp = await client.get("/api/baseline")
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["status"] == "empty"
+    assert body["baseline"] is None
+
+
+@pytest.mark.anyio
+async def test_get_baseline_after_upload():
+    """GET /api/baseline after uploading returns calculated customer baseline profile."""
+    csv_bytes = (FIXTURES / "valid_single_customer.csv").read_bytes()
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        upload_resp = await client.post(
+            "/api/upload",
+            files={"file": ("valid_single_customer.csv", csv_bytes, "text/csv")},
+        )
+        assert upload_resp.status_code == 200
+
+        base_resp = await client.get("/api/baseline")
+        assert base_resp.status_code == 200
+        body = base_resp.json()
+        assert body["status"] == "calculated"
+        assert body["customer_id"] == "CUST001"
+        assert body["transaction_count"] == 3
+
+        baseline_data = body["baseline"]
+        assert baseline_data["amount_statistics"]["mean"] > 0
+        assert "NEFT" in baseline_data["channel_usage"]
+        assert "ABC Corp" in baseline_data["payee_usage"]
+        # Ensure no risk fields present in baseline
+        assert "risk_score" not in baseline_data
+        assert "fraud_probability" not in baseline_data
+
 

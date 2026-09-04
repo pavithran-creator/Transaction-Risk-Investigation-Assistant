@@ -2,6 +2,7 @@ from fastapi import FastAPI, File, UploadFile
 from fastapi.responses import JSONResponse
 import uvicorn
 
+from src.analytics.baseline_calculator import build_customer_baseline
 from src.analytics.csv_validator import validate_csv
 from src.analytics.state import clear_current_dataset, get_current_dataset, set_current_dataset
 from src.analytics.transaction_loader import load_dataset_from_csv_bytes
@@ -132,6 +133,52 @@ def get_transactions():
     )
 
 
+@app.get("/api/baseline")
+def get_baseline():
+    """
+    Retrieve deterministic customer baseline statistics for the loaded transaction history.
+
+    Calculates amount distribution, channel usage, payee breakdown, temporal activity,
+    and daily transaction frequency for the active customer.
+    """
+    dataset = get_current_dataset()
+    if not dataset or dataset.transaction_count == 0:
+        return JSONResponse(
+            status_code=200,
+            content={
+                "status": "empty",
+                "message": "No transaction dataset currently loaded. Please upload a CSV first.",
+                "customer_id": None,
+                "transaction_count": 0,
+                "baseline": None,
+            },
+        )
+
+    baseline = build_customer_baseline(dataset)
+    if not baseline:
+        return JSONResponse(
+            status_code=200,
+            content={
+                "status": "empty",
+                "message": "Unable to calculate customer baseline.",
+                "customer_id": None,
+                "transaction_count": 0,
+                "baseline": None,
+            },
+        )
+
+    return JSONResponse(
+        status_code=200,
+        content={
+            "status": "calculated",
+            "customer_id": baseline.customer_id,
+            "transaction_count": baseline.transaction_count,
+            "baseline": baseline.model_dump(mode="json"),
+        },
+    )
+
+
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
 
