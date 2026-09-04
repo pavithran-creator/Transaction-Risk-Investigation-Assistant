@@ -74,6 +74,52 @@ class Transaction(BaseModel):
 
 
 # ---------------------------------------------------------------------------
+# In-Memory Transaction Dataset Container
+# ---------------------------------------------------------------------------
+class DateRange(BaseModel):
+    """Represents the start and end timestamp of a transaction dataset."""
+
+    earliest: Optional[datetime] = None
+    latest: Optional[datetime] = None
+
+
+class TransactionDataset(BaseModel):
+    """In-memory dataset container for validated transaction history."""
+
+    transactions: List[Transaction] = Field(default_factory=list, description="List of validated Transaction objects")
+
+    @property
+    def transaction_count(self) -> int:
+        """Returns total count of stored transactions."""
+        return len(self.transactions)
+
+    @property
+    def customer_ids(self) -> List[str]:
+        """Returns sorted list of unique customer IDs present in the dataset."""
+        return sorted(list({t.customer_id for t in self.transactions}))
+
+    @property
+    def customer_id(self) -> Optional[str]:
+        """Returns the customer ID if exactly one customer exists, else None."""
+        c_ids = self.customer_ids
+        if len(c_ids) == 1:
+            return c_ids[0]
+        return None
+
+    @property
+    def date_range(self) -> Optional[DateRange]:
+        """Returns DateRange containing earliest and latest timestamps, or None if empty."""
+        if not self.transactions:
+            return None
+        timestamps = [t.timestamp for t in self.transactions]
+        return DateRange(
+            earliest=min(timestamps),
+            latest=max(timestamps),
+        )
+
+
+
+# ---------------------------------------------------------------------------
 # Response helpers
 # ---------------------------------------------------------------------------
 def success_response(

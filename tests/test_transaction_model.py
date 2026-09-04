@@ -1,7 +1,7 @@
 from datetime import datetime
 import pytest
 from pydantic import ValidationError
-from src.models.transaction import Transaction
+from src.models.transaction import Transaction, TransactionDataset, DateRange
 
 
 def test_valid_transaction_creation():
@@ -95,3 +95,64 @@ def test_empty_required_fields():
             amount=100.00,
             channel="UPI",
         )
+
+
+def test_transaction_dataset_empty():
+    ds = TransactionDataset()
+    assert ds.transaction_count == 0
+    assert ds.customer_ids == []
+    assert ds.customer_id is None
+    assert ds.date_range is None
+
+
+def test_transaction_dataset_single_customer():
+    t1 = Transaction(
+        transaction_id="TXN001",
+        customer_id="CUST100",
+        timestamp=datetime(2026, 1, 15, 10, 0, 0),
+        description="Txn 1",
+        payee="Payee A",
+        amount=100.0,
+        channel="UPI",
+    )
+    t2 = Transaction(
+        transaction_id="TXN002",
+        customer_id="CUST100",
+        timestamp=datetime(2026, 1, 16, 12, 0, 0),
+        description="Txn 2",
+        payee="Payee B",
+        amount=200.0,
+        channel="NEFT",
+    )
+    ds = TransactionDataset(transactions=[t1, t2])
+    assert ds.transaction_count == 2
+    assert ds.customer_ids == ["CUST100"]
+    assert ds.customer_id == "CUST100"
+    assert ds.date_range.earliest == datetime(2026, 1, 15, 10, 0, 0)
+    assert ds.date_range.latest == datetime(2026, 1, 16, 12, 0, 0)
+
+
+def test_transaction_dataset_multiple_customers():
+    t1 = Transaction(
+        transaction_id="TXN001",
+        customer_id="CUST100",
+        timestamp=datetime(2026, 1, 15, 10, 0, 0),
+        description="Txn 1",
+        payee="Payee A",
+        amount=100.0,
+        channel="UPI",
+    )
+    t2 = Transaction(
+        transaction_id="TXN002",
+        customer_id="CUST200",
+        timestamp=datetime(2026, 1, 16, 12, 0, 0),
+        description="Txn 2",
+        payee="Payee B",
+        amount=200.0,
+        channel="NEFT",
+    )
+    ds = TransactionDataset(transactions=[t1, t2])
+    assert ds.transaction_count == 2
+    assert ds.customer_ids == ["CUST100", "CUST200"]
+    assert ds.customer_id is None
+
