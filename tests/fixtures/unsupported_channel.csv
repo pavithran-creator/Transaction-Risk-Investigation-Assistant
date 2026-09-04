@@ -1,0 +1,2 @@
+transaction_id,customer_id,timestamp,description,payee,amount,channel
+TXN001,CUST001,2026-01-15 14:30:00,Salary payment,ABC Corp,50000,CRYPTO
