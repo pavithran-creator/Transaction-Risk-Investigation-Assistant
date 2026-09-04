@@ -206,4 +206,66 @@ async def test_get_rules_after_upload():
             assert "fraud_probability" not in rule
 
 
+@pytest.mark.anyio
+async def test_get_attention_before_upload():
+    """GET /api/attention before uploading returns status empty with INSUFFICIENT_EVIDENCE assessment."""
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        resp = await client.get("/api/attention")
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["status"] == "empty"
+    assert body["assessment"]["attention_level"] == "INSUFFICIENT_EVIDENCE"
+
+
+@pytest.mark.anyio
+async def test_get_attention_after_upload():
+    """GET /api/attention after uploading returns evaluated attention assessment."""
+    csv_bytes = (FIXTURES / "valid_single_customer.csv").read_bytes()
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        upload_resp = await client.post(
+            "/api/upload",
+            files={"file": ("valid_single_customer.csv", csv_bytes, "text/csv")},
+        )
+        assert upload_resp.status_code == 200
+
+        att_resp = await client.get("/api/attention")
+        assert att_resp.status_code == 200
+        body = att_resp.json()
+        assert body["status"] == "evaluated"
+        assert body["customer_id"] == "CUST001"
+        assessment = body["assessment"]
+        assert "attention_level" in assessment
+        assert "attention_label" in assessment
+        assert "safety_statement" in assessment
+        assert "does not establish that fraud occurred" in assessment["safety_statement"]
+        assert "risk_score" not in assessment
+        assert "fraud_probability" not in assessment
+
+
+@pytest.mark.anyio
+async def test_get_attention_exception_handling(monkeypatch):
+    """GET /api/attention returns structured 500 JSON without exposing stack trace when an exception occurs."""
+
+    def mock_raise(*args, **kwargs):
+        raise ValueError("Internal test failure")
+
+    monkeypatch.setattr("app.get_current_dataset", mock_raise)
+
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        resp = await client.get("/api/attention")
+
+    assert resp.status_code == 500
+    body = resp.json()
+    assert body["status"] == "error"
+    assert "unexpected error" in body["message"].lower()
+    assert "ValueError" not in str(body)
+    assert "traceback" not in str(body).lower()
+
+
+
+
+
 

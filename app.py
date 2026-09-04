@@ -2,12 +2,14 @@ from fastapi import FastAPI, File, UploadFile
 from fastapi.responses import JSONResponse
 import uvicorn
 
+from src.analytics.attention_engine import evaluate_attention
 from src.analytics.baseline_calculator import build_customer_baseline
 from src.analytics.csv_validator import validate_csv
 from src.analytics.state import clear_current_dataset, get_current_dataset, set_current_dataset
 from src.analytics.transaction_loader import load_dataset_from_csv_bytes
 from src.models.transaction import MAX_UPLOAD_SIZE_BYTES, error_response
 from src.rules.engine import evaluate_all_rules
+
 
 
 app = FastAPI(title="PS06 Transaction Risk Investigation Assistant")
@@ -213,8 +215,53 @@ def get_rules():
     )
 
 
+@app.get("/api/attention")
+def get_attention():
+    """
+    Evaluate deterministic investigator attention assessment for the loaded transaction history.
+
+    Combines Phase 4 customer baseline analysis and Phase 5 deterministic risk rule evidence
+    to determine the appropriate investigator attention level (NO_IMMEDIATE_CONCERN, CONTEXTUAL_REVIEW,
+    ATTENTION_RECOMMENDED, HIGH_ATTENTION, or INSUFFICIENT_EVIDENCE).
+    """
+    try:
+        dataset = get_current_dataset()
+        if not dataset or dataset.transaction_count == 0:
+            return JSONResponse(
+                status_code=200,
+                content={
+                    "status": "empty",
+                    "message": "No transaction dataset currently loaded. Please upload a CSV first.",
+                    "customer_id": None,
+                    "assessment": evaluate_attention(None).model_dump(mode="json"),
+                },
+            )
+
+        assessment = evaluate_attention(dataset)
+        return JSONResponse(
+            status_code=200,
+            content={
+                "status": "evaluated",
+                "customer_id": assessment.customer_id,
+                "assessment": assessment.model_dump(mode="json"),
+            },
+        )
+    except Exception:
+        return JSONResponse(
+            status_code=500,
+            content={
+                "status": "error",
+                "message": "An unexpected error occurred while generating the attention assessment.",
+                "customer_id": None,
+                "assessment": evaluate_attention(None).model_dump(mode="json"),
+            },
+        )
+
+
+
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
 
 
 

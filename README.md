@@ -11,18 +11,43 @@ Financial institutions encounter complex challenges when attempting to detect fi
 > **Phase 3:** Transaction loading, single-customer validation & in-memory dataset structure — ✅ Complete  
 > **Phase 4:** Deterministic Customer Baseline Analysis — ✅ Complete  
 > **Phase 5:** Deterministic Risk Rules Engine (R01–R04) — ✅ Complete  
+> **Phase 6:** Deterministic Attention-Level & Evidence Combination Engine — ✅ Complete  
 
 The project currently provides:
 - A FastAPI backend server with health-check endpoint (`GET /`).
 - A CSV upload endpoint (`POST /api/upload`) that accepts, validates, and loads transaction CSV files.
 - Single-customer transaction history enforcement (`MULTIPLE_CUSTOMERS_NOT_ALLOWED`).
-- Pydantic domain models (`Transaction`, `TransactionDataset`, `CustomerBaseline`, `RuleResult`, `RuleEvaluationResult`, etc.).
+- Pydantic domain models (`Transaction`, `TransactionDataset`, `CustomerBaseline`, `RuleResult`, `CustomerAttentionAssessment`, etc.).
 - Automatic chronological ordering of transactions with deterministic secondary sorting by `transaction_id`.
-- Transaction retrieval endpoint (`GET /api/transactions`) exxposing loaded in-memory transaction history.
+- Transaction retrieval endpoint (`GET /api/transactions`) exposing loaded in-memory transaction history.
 - Customer baseline analysis endpoint (`GET /api/baseline`) returning deterministic historical behavior profile.
 - Deterministic risk rules evaluation endpoint (`GET /api/rules`) evaluating R01–R04 with rule evidence and indicators.
+- Deterministic attention level assessment endpoint (`GET /api/attention`) combining rule evidence for investigator prioritization.
 
-**Not yet implemented:** Phase 6 Attention Levels, Risk Scores / Percentages, Fraud Probabilities, Gemini AI integration, RAG, database persistence, or frontend dashboard.
+**Not yet implemented:** Gemini AI integration, RAG, natural-language investigation reports, database persistence, or frontend dashboard.
+
+## Attention-Level / Evidence Combination Engine (Phase 6)
+
+Phase 6 provides a deterministic evidence-combination layer that converts Phase 5 rule results into investigator-oriented attention levels.
+
+### Core Attention Levels
+1. **`NO_IMMEDIATE_CONCERN` ("No Immediate Concern"):**  
+   0 deterministic risk rules triggered. No defined risk indicators were triggered by the current checks.
+2. **`CONTEXTUAL_REVIEW` ("Contextual Review"):**  
+   1 deterministic risk rule triggered. Review the transaction in context before drawing conclusions.
+3. **`ATTENTION_RECOMMENDED` ("Attention Recommended"):**  
+   2 distinct deterministic risk rules triggered. Available evidence warrants investigator attention.
+4. **`HIGH_ATTENTION` ("High Attention"):**  
+   3 or more distinct deterministic risk rules triggered. Multiple independent indicators warrant high-priority investigation.
+5. **`INSUFFICIENT_EVIDENCE` ("Insufficient Evidence"):**  
+   Dataset or baseline evidence is missing/empty, preventing a reliable assessment.
+
+### Important Principles
+- **Attention Level is NOT Fraud Probability:** The engine does NOT output numeric fraud scores, probabilities, or percentages.
+- **100% Deterministic:** Operates purely through transparent Python decision logic without AI/LLM guesswork.
+- **Transaction & Customer Levels:** Maps rule triggers to individual transactions while producing an overall customer assessment.
+- **Investigator Safety Statement:** Every assessment includes:  
+  `"This assessment identifies transaction patterns that may warrant investigation. It does not establish that fraud occurred."`
 
 ## Deterministic Risk Rules (Phase 5)
 
@@ -97,107 +122,38 @@ Upload, validate, and load a transaction CSV file into memory.
 **File size limit:** 10 MB  
 **Constraint:** Must contain transactions for exactly one customer.
 
-**Success response (200):**
-```json
-{
-  "valid": true,
-  "message": "Transaction CSV validated successfully",
-  "transaction_count": 3,
-  "customer_count": 1,
-  "columns": ["transaction_id", "customer_id", "timestamp", "description", "payee", "amount", "channel"],
-  "transactions": [...]
-}
-```
-
 ### `GET /api/transactions`
 Retrieve currently loaded in-memory transaction history.
-
-**Loaded response (200):**
-```json
-{
-  "status": "loaded",
-  "customer_id": "CUST001",
-  "transaction_count": 3,
-  "date_range": {
-    "earliest": "2026-01-15T14:30:00",
-    "latest": "2026-01-17T10:20:00"
-  },
-  "transactions": [...]
-}
-```
 
 ### `GET /api/baseline`
 Retrieve calculated customer baseline profile.
 
-**Calculated response (200):**
-```json
-{
-  "status": "calculated",
-  "customer_id": "CUST001",
-  "transaction_count": 3,
-  "baseline": {
-    "customer_id": "CUST001",
-    "transaction_count": 3,
-    "date_range": { "start": "...", "end": "..." },
-    "amount_statistics": { "min": 499.0, "max": 50000.0, "mean": 17233.17, "median": 1200.5, "p25": 849.75, "p75": 25600.25, "p90": 40240.1, "p95": 45120.05 },
-    "channel_usage": { "NEFT": { "count": 1, "percentage": 33.33 }, "UPI": { "count": 2, "percentage": 66.67 } },
-    "payee_usage": { "ABC Corp": { "transaction_count": 1, "total_amount": 50000.0, "first_seen": "...", "last_seen": "..." } },
-    "hourly_activity": { ... },
-    "weekday_activity": { ... },
-    "frequency": { "active_days": 3, "average_transactions_per_active_day": 1.0, "max_transactions_in_day": 1, "min_transactions_in_active_day": 1 }
-  }
-}
-```
-
 ### `GET /api/rules`
-Retrieve deterministic risk rule evaluations for the active dataset.
+Retrieve deterministic risk rule evaluations (R01–R04).
+
+### `GET /api/attention`
+Retrieve deterministic investigator attention assessment.
 
 **Evaluated response (200):**
 ```json
 {
   "status": "evaluated",
   "customer_id": "CUST001",
-  "evaluated_at_transaction_count": 3,
-  "rules": [
-    {
-      "rule_id": "R01",
-      "name": "Unusually Large Transfer",
-      "triggered": true,
-      "transaction_ids": ["TXN003"],
-      "evidence": [
-        {
-          "transaction_id": "TXN003",
-          "field": "amount",
-          "value": "50000.0",
-          "baseline_value": "45120.05",
-          "threshold_value": "45120.05",
-          "comparison": "Amount 50000.0 exceeds customer P95 baseline of 45120.05",
-          "reasoning": "Transaction TXN003 amount of 50000.0 exceeds the customer's 95th percentile baseline threshold of 45120.05."
-        }
-      ]
-    },
-    {
-      "rule_id": "R02",
-      "name": "Burst of Payments to a Newly Added Payee",
-      "triggered": false,
-      "transaction_ids": [],
-      "evidence": []
-    },
-    {
-      "rule_id": "R03",
-      "name": "Odd-Hours Activity",
-      "triggered": false,
-      "transaction_ids": [],
-      "evidence": []
-    },
-    {
-      "rule_id": "R04",
-      "name": "Transaction Breaking Established Pattern",
-      "triggered": false,
-      "transaction_ids": [],
-      "evidence": []
-    }
-  ]
+  "assessment": {
+    "customer_id": "CUST001",
+    "attention_level": "ATTENTION_RECOMMENDED",
+    "attention_label": "Attention Recommended",
+    "triggered_rules": ["R01", "R03"],
+    "transactions": [
+      {
+        "transaction_id": "TXN003",
+        "triggered_rules": ["R01", "R03"]
+      }
+    ],
+    "rule_results": [...],
+    "reason": "Multiple deterministic risk indicators were triggered and warrant investigator attention.",
+    "safety_statement": "This assessment identifies transaction patterns that may warrant investigation. It does not establish that fraud occurred."
+  }
 }
 ```
 
@@ -222,6 +178,7 @@ pytest tests/ -v
 - **Transactions Endpoint:** `GET` [http://localhost:8000/api/transactions](http://localhost:8000/api/transactions)
 - **Baseline Endpoint:** `GET` [http://localhost:8000/api/baseline](http://localhost:8000/api/baseline)
 - **Rules Endpoint:** `GET` [http://localhost:8000/api/rules](http://localhost:8000/api/rules)
+- **Attention Endpoint:** `GET` [http://localhost:8000/api/attention](http://localhost:8000/api/attention)
 - **Interactive OpenAPI Documentation:** [http://localhost:8000/docs](http://localhost:8000/docs)
 - **ReDoc Documentation:** [http://localhost:8000/redoc](http://localhost:8000/redoc)
 
@@ -239,12 +196,14 @@ PS06-Risk-Investigation/
 │   │   ├── csv_validator.py
 │   │   ├── transaction_loader.py
 │   │   ├── baseline_calculator.py
+│   │   ├── attention_engine.py
 │   │   └── state.py
 │   ├── models/
 │   │   ├── __init__.py
 │   │   ├── transaction.py
 │   │   ├── baseline.py
-│   │   └── rules.py
+│   │   ├── rules.py
+│   │   └── attention.py
 │   ├── rules/
 │   │   ├── __init__.py
 │   │   ├── constants.py
@@ -276,17 +235,13 @@ PS06-Risk-Investigation/
     ├── test_r04_rule.py
     ├── test_rule_engine.py
     ├── test_rule_edge_cases.py
+    ├── test_attention_models.py
+    ├── test_attention_engine.py
+    ├── test_transaction_attention.py
+    ├── test_customer_attention.py
+    ├── test_insufficient_evidence.py
+    ├── test_attention_edge_cases.py
+    ├── test_phase6_regression.py
     ├── test_api.py
     └── fixtures/
-        ├── valid.csv
-        ├── valid_single_customer.csv
-        ├── extra_columns.csv
-        ├── missing_column.csv
-        ├── duplicate_txn_id.csv
-        ├── headers_only.csv
-        ├── invalid_amounts.csv
-        ├── invalid_timestamp.csv
-        ├── unsupported_channel.csv
-        ├── missing_values.csv
-        └── normalization.csv
 ```
