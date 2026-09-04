@@ -1,9 +1,11 @@
 from pathlib import Path
 import pytest
 from src.analytics.transaction_loader import (
+    MULTIPLE_CUSTOMERS_ERROR_CODE,
     load_dataset_from_csv_bytes,
     load_dataset_from_validated_records,
     records_to_transactions,
+    validate_single_customer,
 )
 from src.models.transaction import TransactionDataset
 
@@ -33,9 +35,10 @@ def test_records_to_transactions_preserves_fields():
     assert t.extra_fields == {"location": "Mumbai"}
 
 
-def test_load_dataset_from_valid_csv_fixture():
+
+def test_load_dataset_from_valid_csv_fixture_without_single_customer_enforcement():
     valid_csv = (FIXTURES_DIR / "valid.csv").read_bytes()
-    dataset, errors = load_dataset_from_csv_bytes(valid_csv)
+    dataset, errors = load_dataset_from_csv_bytes(valid_csv, enforce_single_customer=False)
 
     assert errors == []
     assert isinstance(dataset, TransactionDataset)
@@ -44,9 +47,36 @@ def test_load_dataset_from_valid_csv_fixture():
     assert dataset.date_range is not None
 
 
+def test_multiple_customers_rejected():
+    valid_csv = (FIXTURES_DIR / "valid.csv").read_bytes()
+    dataset, errors = load_dataset_from_csv_bytes(valid_csv, enforce_single_customer=True)
+
+    assert dataset is None
+    assert len(errors) == 1
+    assert MULTIPLE_CUSTOMERS_ERROR_CODE in errors[0]
+    assert "CUST001" in errors[0]
+    assert "CUST002" in errors[0]
+    assert "CUST003" in errors[0]
+
+
+def test_single_customer_dataset_accepted():
+    single_cust_csv = (
+        "transaction_id,customer_id,timestamp,description,payee,amount,channel\n"
+        "TXN001,CUST001,2026-01-15 14:30:00,Salary,ABC Corp,50000,NEFT\n"
+        "TXN002,CUST001,2026-01-16 09:15:00,Grocery,Fresh Mart,1200.50,UPI\n"
+    ).encode("utf-8")
+    dataset, errors = load_dataset_from_csv_bytes(single_cust_csv, enforce_single_customer=True)
+
+    assert errors == []
+    assert dataset is not None
+    assert dataset.customer_id == "CUST001"
+    assert dataset.transaction_count == 2
+
+
+
 def test_load_dataset_from_extra_columns_fixture():
     extra_csv = (FIXTURES_DIR / "extra_columns.csv").read_bytes()
-    dataset, errors = load_dataset_from_csv_bytes(extra_csv)
+    dataset, errors = load_dataset_from_csv_bytes(extra_csv, enforce_single_customer=False)
 
     assert errors == []
     assert dataset is not None
