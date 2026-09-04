@@ -8,17 +8,31 @@ Financial institutions encounter complex challenges when attempting to detect fi
 ## Current Implementation Status
 > **Phase 1:** Initial FastAPI foundation — ✅ Complete  
 > **Phase 2:** CSV upload and transaction validation — ✅ Complete  
-> **Phase 3:** Transaction loading, single-customer validation & in-memory dataset structure — ✅ Complete
+> **Phase 3:** Transaction loading, single-customer validation & in-memory dataset structure — ✅ Complete  
+> **Phase 4:** Deterministic Customer Baseline Analysis — ✅ Complete
 
 The project currently provides:
 - A FastAPI backend server with health-check endpoint (`GET /`).
 - A CSV upload endpoint (`POST /api/upload`) that accepts, validates, and loads transaction CSV files.
 - Single-customer transaction history enforcement (`MULTIPLE_CUSTOMERS_NOT_ALLOWED`).
-- Pydantic domain models (`Transaction`, `TransactionDataset`, `DateRange`).
+- Pydantic domain models (`Transaction`, `TransactionDataset`, `CustomerBaseline`, `AmountStatistics`, etc.).
 - Automatic chronological ordering of transactions with deterministic secondary sorting by `transaction_id`.
 - Transaction retrieval endpoint (`GET /api/transactions`) exposing loaded in-memory transaction history.
+- Customer baseline analysis endpoint (`GET /api/baseline`) returning deterministic historical behavior profile.
 
-**Not yet implemented:** Customer baseline analysis, risk rules (R01–R04), risk scoring, fraud classification, receiver/payee risk analysis, attention levels, Gemini AI integration, RAG, database persistence, or frontend dashboard.
+**Not yet implemented:** Risk rules (R01–R04), risk scoring, fraud classification, receiver/payee risk classification, attention levels, Gemini AI integration, RAG, database persistence, or frontend dashboard.
+
+## Customer Baseline Analysis (Phase 4)
+
+The customer baseline represents the customer's established transaction behavior derived strictly from their uploaded transaction history. It provides a deterministic statistical foundation for future risk comparison:
+
+- **Amount Statistics:** Minimum, maximum, mean, median, 25th, 75th, 90th, and 95th percentiles.
+- **Channel Usage:** Transaction counts and percentage distribution across channels (UPI, NEFT, CARD, etc.).
+- **Payee History:** Historical transaction counts, total amounts, `first_seen`, and `last_seen` timestamps per payee.
+- **Temporal Activity:** Activity breakdown by hour of day (00–23) and day of week (Monday–Sunday).
+- **Daily Frequency:** Active calendar days count, average transactions per active day, maximum daily count, minimum daily count.
+
+*Note: Baseline calculations are purely descriptive and deterministic. No risk rules or fraud classifications are applied in Phase 4.*
 
 ## Current Technology Stack
 - **Language:** Python 3.11+
@@ -77,16 +91,6 @@ Upload, validate, and load a transaction CSV file into memory.
 }
 ```
 
-**Multiple customer error response (422):**
-```json
-{
-  "valid": false,
-  "errors": [
-    "MULTIPLE_CUSTOMERS_NOT_ALLOWED: Uploaded transaction history contains multiple customers (CUST001, CUST002). Only single customer transaction history is allowed per upload."
-  ]
-}
-```
-
 ### `GET /api/transactions`
 Retrieve currently loaded in-memory transaction history.
 
@@ -104,31 +108,28 @@ Retrieve currently loaded in-memory transaction history.
 }
 ```
 
-**Empty response (200):**
+### `GET /api/baseline`
+Retrieve calculated customer baseline profile.
+
+**Calculated response (200):**
 ```json
 {
-  "status": "empty",
-  "message": "No transaction dataset currently loaded. Please upload a CSV first.",
-  "transaction_count": 0,
-  "customer_id": null,
-  "transactions": []
+  "status": "calculated",
+  "customer_id": "CUST001",
+  "transaction_count": 3,
+  "baseline": {
+    "customer_id": "CUST001",
+    "transaction_count": 3,
+    "date_range": { "start": "...", "end": "..." },
+    "amount_statistics": { "min": 499.0, "max": 50000.0, "mean": 17233.17, "median": 1200.5, "p25": 849.75, "p75": 25600.25, "p90": 40240.1, "p95": 45120.05 },
+    "channel_usage": { "NEFT": { "count": 1, "percentage": 33.33 }, "UPI": { "count": 2, "percentage": 66.67 } },
+    "payee_usage": { "ABC Corp": { "transaction_count": 1, "total_amount": 50000.0, "first_seen": "...", "last_seen": "..." } },
+    "hourly_activity": { ... },
+    "weekday_activity": { ... },
+    "frequency": { "active_days": 3, "average_transactions_per_active_day": 1.0, "max_transactions_in_day": 1, "min_transactions_in_active_day": 1 }
+  }
 }
 ```
-
-## Validation & Business Rules
-
-The system validates:
-
-- **File level:** Empty file, invalid CSV structure, missing required columns, file size limit.
-- **Single customer rule:** Validates that all transactions belong to a single customer ID.
-- **Transaction IDs:** Present, non-empty, unique within the file.
-- **Customer IDs:** Present, non-empty.
-- **Timestamps:** Present, parseable to a valid date/time.
-- **Amounts:** Present, numeric, greater than zero.
-- **Payees:** Present, non-empty.
-- **Descriptions:** Present, non-empty.
-- **Channels:** Present, non-empty, must be a supported channel value.
-- **Ordering:** Transactions are sorted chronologically by timestamp, with deterministic secondary sorting by `transaction_id` for equal timestamps.
 
 ## Installation
 ```bash
@@ -149,6 +150,7 @@ pytest tests/ -v
 - **Root Endpoint:** [http://localhost:8000/](http://localhost:8000/)
 - **Upload Endpoint:** `POST` [http://localhost:8000/api/upload](http://localhost:8000/api/upload)
 - **Transactions Endpoint:** `GET` [http://localhost:8000/api/transactions](http://localhost:8000/api/transactions)
+- **Baseline Endpoint:** `GET` [http://localhost:8000/api/baseline](http://localhost:8000/api/baseline)
 - **Interactive OpenAPI Documentation:** [http://localhost:8000/docs](http://localhost:8000/docs)
 - **ReDoc Documentation:** [http://localhost:8000/redoc](http://localhost:8000/redoc)
 
@@ -165,10 +167,12 @@ PS06-Risk-Investigation/
 │   │   ├── __init__.py
 │   │   ├── csv_validator.py
 │   │   ├── transaction_loader.py
+│   │   ├── baseline_calculator.py
 │   │   └── state.py
 │   ├── models/
 │   │   ├── __init__.py
-│   │   └── transaction.py
+│   │   ├── transaction.py
+│   │   └── baseline.py
 │   ├── rules/
 │   ├── ai/
 │   ├── reports/
@@ -180,6 +184,12 @@ PS06-Risk-Investigation/
     ├── test_csv_validator.py
     ├── test_transaction_model.py
     ├── test_transaction_loader.py
+    ├── test_baseline_model.py
+    ├── test_amount_baseline.py
+    ├── test_channel_payee_baseline.py
+    ├── test_temporal_frequency_baseline.py
+    ├── test_baseline_service.py
+    ├── test_baseline_edge_cases.py
     ├── test_api.py
     └── fixtures/
         ├── valid.csv
@@ -194,4 +204,5 @@ PS06-Risk-Investigation/
         ├── missing_values.csv
         └── normalization.csv
 ```
+
 
