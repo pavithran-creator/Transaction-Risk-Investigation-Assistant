@@ -9,8 +9,16 @@ from collections import defaultdict
 from typing import Dict, List, Optional
 import numpy as np
 
-from src.models.baseline import AmountStatistics, ChannelUsage, PayeeUsage
+from src.models.baseline import (
+    ActivityStats,
+    AmountStatistics,
+    ChannelUsage,
+    FrequencyStatistics,
+    PayeeUsage,
+)
 from src.models.transaction import Transaction
+
+WEEKDAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 
 
 def calculate_amount_statistics(amounts: List[float]) -> Optional[AmountStatistics]:
@@ -102,4 +110,82 @@ def calculate_payee_usage(transactions: List[Transaction]) -> Dict[str, PayeeUsa
         )
 
     return payee_stats
+
+
+def calculate_hourly_activity(transactions: List[Transaction]) -> Dict[str, ActivityStats]:
+    """
+    Calculate transaction activity distribution by hour of day (00 to 23).
+    """
+    if not transactions:
+        return {}
+
+    total = len(transactions)
+    counts: Dict[str, int] = {f"{h:02d}": 0 for h in range(24)}
+
+    for t in transactions:
+        hour_str = f"{t.timestamp.hour:02d}"
+        counts[hour_str] += 1
+
+    # Filter to hours with non-zero activity, or return formatted dict
+    activity: Dict[str, ActivityStats] = {}
+    for hour_str in sorted(counts.keys()):
+        h_count = counts[hour_str]
+        pct = round((h_count / total) * 100.0, 2)
+        activity[hour_str] = ActivityStats(count=h_count, percentage=pct)
+
+    return activity
+
+
+def calculate_weekday_activity(transactions: List[Transaction]) -> Dict[str, ActivityStats]:
+    """
+    Calculate transaction activity distribution by day of week (Monday to Sunday).
+    """
+    if not transactions:
+        return {}
+
+    total = len(transactions)
+    counts: Dict[str, int] = {day: 0 for day in WEEKDAYS}
+
+    for t in transactions:
+        day_str = t.timestamp.strftime("%A")
+        if day_str in counts:
+            counts[day_str] += 1
+
+    activity: Dict[str, ActivityStats] = {}
+    for day_str in WEEKDAYS:
+        w_count = counts[day_str]
+        pct = round((w_count / total) * 100.0, 2)
+        activity[day_str] = ActivityStats(count=w_count, percentage=pct)
+
+    return activity
+
+
+def calculate_frequency_statistics(transactions: List[Transaction]) -> Optional[FrequencyStatistics]:
+    """
+    Calculate transaction frequency metrics (active days, avg per active day, max & min daily count).
+    """
+    if not transactions:
+        return None
+
+    daily_groups: Dict[str, int] = defaultdict(int)
+    for t in transactions:
+        day_key = t.timestamp.strftime("%Y-%m-%d")
+        daily_groups[day_key] += 1
+
+    active_days = len(daily_groups)
+    if active_days == 0:
+        return None
+
+    counts_list = list(daily_groups.values())
+    avg_per_day = round(len(transactions) / active_days, 2)
+    max_daily = max(counts_list)
+    min_daily = min(counts_list)
+
+    return FrequencyStatistics(
+        active_days=active_days,
+        average_transactions_per_active_day=avg_per_day,
+        max_transactions_in_day=max_daily,
+        min_transactions_in_active_day=min_daily,
+    )
+
 
