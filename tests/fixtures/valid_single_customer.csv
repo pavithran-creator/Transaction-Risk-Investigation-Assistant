@@ -1,0 +1,4 @@
+transaction_id,customer_id,timestamp,description,payee,amount,channel
+TXN001,CUST001,2026-01-15 14:30:00,Salary payment,ABC Corp,50000,NEFT
+TXN002,CUST001,2026-01-16 09:15:00,Grocery purchase,Fresh Mart,1200.50,UPI
+TXN003,CUST001,2026-01-17 10:20:00,Mobile recharge,Telecom Provider,499,UPI

@@ -17,6 +17,17 @@ def anyio_backend():
     return "asyncio"
 
 
+from src.analytics.state import clear_current_dataset
+
+
+@pytest.fixture(autouse=True)
+def reset_in_memory_state():
+    """Ensure in-memory state is cleared before each test."""
+    clear_current_dataset()
+    yield
+    clear_current_dataset()
+
+
 @pytest.mark.anyio
 async def test_root_still_works():
     """GET / must continue returning the running message."""
@@ -28,8 +39,47 @@ async def test_root_still_works():
 
 
 @pytest.mark.anyio
-async def test_upload_valid_csv():
-    """POST /api/upload with a valid CSV returns 200 and valid=True."""
+async def test_get_transactions_before_upload():
+    """GET /api/transactions before uploading a dataset returns status empty."""
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        resp = await client.get("/api/transactions")
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["status"] == "empty"
+    assert body["transaction_count"] == 0
+    assert body["transactions"] == []
+
+
+@pytest.mark.anyio
+async def test_upload_single_customer_valid_csv():
+    """POST /api/upload with a single-customer valid CSV succeeds and loads transactions."""
+    csv_bytes = (FIXTURES / "valid_single_customer.csv").read_bytes()
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        upload_resp = await client.post(
+            "/api/upload",
+            files={"file": ("valid_single_customer.csv", csv_bytes, "text/csv")},
+        )
+        assert upload_resp.status_code == 200
+        assert upload_resp.json()["valid"] is True
+
+        get_resp = await client.get("/api/transactions")
+        assert get_resp.status_code == 200
+        get_body = get_resp.json()
+        assert get_body["status"] == "loaded"
+        assert get_body["customer_id"] == "CUST001"
+        assert get_body["transaction_count"] == 3
+        assert len(get_body["transactions"]) == 3
+        # Check no risk-related fields are exposed
+        for txn in get_body["transactions"]:
+            assert "risk_score" not in txn
+            assert "fraud_probability" not in txn
+
+
+@pytest.mark.anyio
+async def test_upload_multiple_customers_rejected():
+    """POST /api/upload with multiple customers returns 422 MULTIPLE_CUSTOMERS_NOT_ALLOWED."""
     csv_bytes = (FIXTURES / "valid.csv").read_bytes()
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as client:
@@ -37,10 +87,10 @@ async def test_upload_valid_csv():
             "/api/upload",
             files={"file": ("valid.csv", csv_bytes, "text/csv")},
         )
-    assert resp.status_code == 200
+    assert resp.status_code == 422
     body = resp.json()
-    assert body["valid"] is True
-    assert body["transaction_count"] == 7
+    assert body["valid"] is False
+    assert any("MULTIPLE_CUSTOMERS_NOT_ALLOWED" in err for err in body["errors"])
 
 
 @pytest.mark.anyio
@@ -79,3 +129,4 @@ async def test_upload_no_file():
     async with AsyncClient(transport=transport, base_url="http://test") as client:
         resp = await client.post("/api/upload")
     assert resp.status_code == 422
+
