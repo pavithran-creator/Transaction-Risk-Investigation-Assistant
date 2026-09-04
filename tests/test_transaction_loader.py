@@ -91,3 +91,18 @@ def test_load_dataset_from_invalid_csv_fixture():
 
     assert dataset is None
     assert len(errors) > 0
+
+
+def test_load_dataset_chronological_ordering():
+    unordered_csv = (
+        "transaction_id,customer_id,timestamp,description,payee,amount,channel\n"
+        "TXN003,CUST001,2026-01-17 10:00:00,Txn 3,Payee C,300,UPI\n"
+        "TXN001,CUST001,2026-01-15 10:00:00,Txn 1,Payee A,100,NEFT\n"
+        "TXN002,CUST001,2026-01-16 10:00:00,Txn 2,Payee B,200,IMPS\n"
+    ).encode("utf-8")
+    dataset, errors = load_dataset_from_csv_bytes(unordered_csv)
+
+    assert errors == []
+    assert dataset is not None
+    assert [t.transaction_id for t in dataset.transactions] == ["TXN001", "TXN002", "TXN003"]
+
