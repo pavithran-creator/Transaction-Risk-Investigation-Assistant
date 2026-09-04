@@ -12,19 +12,43 @@ Financial institutions encounter complex challenges when attempting to detect fi
 > **Phase 4:** Deterministic Customer Baseline Analysis — ✅ Complete  
 > **Phase 5:** Deterministic Risk Rules Engine (R01–R04) — ✅ Complete  
 > **Phase 6:** Deterministic Attention-Level & Evidence Combination Engine — ✅ Complete  
+> **Phase 7:** Grounded Gemini Investigation Explanation Engine — ✅ Complete  
 
 The project currently provides:
 - A FastAPI backend server with health-check endpoint (`GET /`).
 - A CSV upload endpoint (`POST /api/upload`) that accepts, validates, and loads transaction CSV files.
 - Single-customer transaction history enforcement (`MULTIPLE_CUSTOMERS_NOT_ALLOWED`).
-- Pydantic domain models (`Transaction`, `TransactionDataset`, `CustomerBaseline`, `RuleResult`, `CustomerAttentionAssessment`, etc.).
+- Pydantic domain models (`Transaction`, `TransactionDataset`, `CustomerBaseline`, `RuleResult`, `CustomerAttentionAssessment`, `InvestigationExplanation`, etc.).
 - Automatic chronological ordering of transactions with deterministic secondary sorting by `transaction_id`.
 - Transaction retrieval endpoint (`GET /api/transactions`) exposing loaded in-memory transaction history.
 - Customer baseline analysis endpoint (`GET /api/baseline`) returning deterministic historical behavior profile.
 - Deterministic risk rules evaluation endpoint (`GET /api/rules`) evaluating R01–R04 with rule evidence and indicators.
 - Deterministic attention level assessment endpoint (`GET /api/attention`) combining rule evidence for investigator prioritization.
+- Grounded Gemini investigation explanation endpoint (`GET /api/investigation`) providing natural-language investigator explanations strictly derived from deterministic evidence.
 
-**Not yet implemented:** Gemini AI integration, RAG, natural-language investigation reports, database persistence, or frontend dashboard.
+## Grounded Gemini Investigation Explanation (Phase 7)
+
+Phase 7 adds a Gemini LLM-powered explanation layer built on top of the Phase 1–6 deterministic analytical pipeline.
+
+```text
+Deterministic Pipeline (Phases 1-6)
+Transaction History → Customer Baseline → Risk Rules (R01-R04) → Attention Level
+                                                                          ↓
+                                                               Grounded Gemini Prompt
+                                                                          ↓
+                                                                Gemini 2.5 Flash LLM
+                                                                          ↓
+                                                                 Grounding Validator
+                                                                          ↓
+                                                             Investigation Explanation
+```
+
+### Key Principles & Safeguards
+- **Deterministic System Decides WHAT Happened:** Gemini ONLY explains WHY it may deserve attention based on supplied evidence.
+- **Strict Grounding:** Gemini is supplied with structured `InvestigationContext`. Output is validated against context to eliminate hallucinated transaction IDs, invalid rules, or altered attention levels.
+- **Zero Fraud Assertions or Scores:** Explanations never state fraud occurred, nor do they generate numeric fraud scores or probabilities.
+- **Graceful Fallbacks:** If `GEMINI_API_KEY` is missing or API calls fail, the system returns a structured deterministic fallback response.
+
 
 ## Attention-Level / Evidence Combination Engine (Phase 6)
 

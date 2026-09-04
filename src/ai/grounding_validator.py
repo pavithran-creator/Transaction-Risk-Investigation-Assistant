@@ -64,6 +64,22 @@ def validate_explanation_grounding(
         if tx_id not in valid_tx_ids:
             errors.append(f"Invalid transaction ID cited in explanation: '{tx_id}'. Not found in context.")
 
+    # Also scan text for hallucinated transaction ID tokens (e.g. TX_..., TX001, TXN_...)
+    full_text = " ".join([
+        explanation.assessment,
+        explanation.why_attention,
+        explanation.context_reducing_concern or "",
+        " ".join(explanation.evidence_summary),
+        " ".join(explanation.suggested_checks),
+    ])
+
+    potential_tx_matches = re.findall(r"\b(TX[N]?_?[A-Za-z0-9_\-]+)\b", full_text)
+    for tx_match in potential_tx_matches:
+        # Ignore common non-TX words if any
+        if tx_match.startswith(("TX_", "TX", "TXN")) and len(tx_match) >= 4:
+            if tx_match not in valid_tx_ids:
+                errors.append(f"Invalid transaction ID cited in explanation text: '{tx_match}'. Not found in context.")
+
     # 3. Check Triggered Rule IDs
     valid_rule_ids = {r.rule_id for r in context.triggered_rules}
     for tr in explanation.triggered_rules:
