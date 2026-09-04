@@ -7,6 +7,8 @@ from src.analytics.csv_validator import validate_csv
 from src.analytics.state import clear_current_dataset, get_current_dataset, set_current_dataset
 from src.analytics.transaction_loader import load_dataset_from_csv_bytes
 from src.models.transaction import MAX_UPLOAD_SIZE_BYTES, error_response
+from src.rules.engine import evaluate_all_rules
+
 
 app = FastAPI(title="PS06 Transaction Risk Investigation Assistant")
 
@@ -178,7 +180,41 @@ def get_baseline():
     )
 
 
+@app.get("/api/rules")
+def get_rules():
+    """
+    Evaluate deterministic risk rules (R01-R04) for the loaded transaction history.
+
+    Returns deterministic evaluation results for R01, R02, R03, and R04 along with
+    rule evidence and indicators.
+    """
+    dataset = get_current_dataset()
+    if not dataset or dataset.transaction_count == 0:
+        return JSONResponse(
+            status_code=200,
+            content={
+                "status": "empty",
+                "message": "No transaction dataset currently loaded. Please upload a CSV first.",
+                "customer_id": None,
+                "evaluated_at_transaction_count": 0,
+                "rules": [],
+            },
+        )
+
+    eval_result = evaluate_all_rules(dataset)
+    return JSONResponse(
+        status_code=200,
+        content={
+            "status": "evaluated",
+            "customer_id": eval_result.customer_id,
+            "evaluated_at_transaction_count": eval_result.evaluated_at_transaction_count,
+            "rules": [r.model_dump(mode="json") for r in eval_result.rules],
+        },
+    )
+
+
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
 
 

@@ -162,3 +162,48 @@ async def test_get_baseline_after_upload():
         assert "fraud_probability" not in baseline_data
 
 
+@pytest.mark.anyio
+async def test_get_rules_before_upload():
+    """GET /api/rules before uploading returns status empty."""
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        resp = await client.get("/api/rules")
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["status"] == "empty"
+    assert body["evaluated_at_transaction_count"] == 0
+    assert body["rules"] == []
+
+
+@pytest.mark.anyio
+async def test_get_rules_after_upload():
+    """GET /api/rules after uploading returns evaluated risk rules results."""
+    csv_bytes = (FIXTURES / "valid_single_customer.csv").read_bytes()
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        upload_resp = await client.post(
+            "/api/upload",
+            files={"file": ("valid_single_customer.csv", csv_bytes, "text/csv")},
+        )
+        assert upload_resp.status_code == 200
+
+        rules_resp = await client.get("/api/rules")
+        assert rules_resp.status_code == 200
+        body = rules_resp.json()
+        assert body["status"] == "evaluated"
+        assert body["customer_id"] == "CUST001"
+        assert body["evaluated_at_transaction_count"] == 3
+
+        rules = body["rules"]
+        assert len(rules) == 4
+        rule_ids = [r["rule_id"] for r in rules]
+        assert rule_ids == ["R01", "R02", "R03", "R04"]
+
+        for rule in rules:
+            assert "triggered" in rule
+            assert "evidence" in rule
+            assert "risk_score" not in rule
+            assert "fraud_probability" not in rule
+
+
+
