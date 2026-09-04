@@ -9,30 +9,48 @@ Financial institutions encounter complex challenges when attempting to detect fi
 > **Phase 1:** Initial FastAPI foundation — ✅ Complete  
 > **Phase 2:** CSV upload and transaction validation — ✅ Complete  
 > **Phase 3:** Transaction loading, single-customer validation & in-memory dataset structure — ✅ Complete  
-> **Phase 4:** Deterministic Customer Baseline Analysis — ✅ Complete
+> **Phase 4:** Deterministic Customer Baseline Analysis — ✅ Complete  
+> **Phase 5:** Deterministic Risk Rules Engine (R01–R04) — ✅ Complete  
 
 The project currently provides:
 - A FastAPI backend server with health-check endpoint (`GET /`).
 - A CSV upload endpoint (`POST /api/upload`) that accepts, validates, and loads transaction CSV files.
 - Single-customer transaction history enforcement (`MULTIPLE_CUSTOMERS_NOT_ALLOWED`).
-- Pydantic domain models (`Transaction`, `TransactionDataset`, `CustomerBaseline`, `AmountStatistics`, etc.).
+- Pydantic domain models (`Transaction`, `TransactionDataset`, `CustomerBaseline`, `RuleResult`, `RuleEvaluationResult`, etc.).
 - Automatic chronological ordering of transactions with deterministic secondary sorting by `transaction_id`.
-- Transaction retrieval endpoint (`GET /api/transactions`) exposing loaded in-memory transaction history.
+- Transaction retrieval endpoint (`GET /api/transactions`) exxposing loaded in-memory transaction history.
 - Customer baseline analysis endpoint (`GET /api/baseline`) returning deterministic historical behavior profile.
+- Deterministic risk rules evaluation endpoint (`GET /api/rules`) evaluating R01–R04 with rule evidence and indicators.
 
-**Not yet implemented:** Risk rules (R01–R04), risk scoring, fraud classification, receiver/payee risk classification, attention levels, Gemini AI integration, RAG, database persistence, or frontend dashboard.
+**Not yet implemented:** Phase 6 Attention Levels, Risk Scores / Percentages, Fraud Probabilities, Gemini AI integration, RAG, database persistence, or frontend dashboard.
+
+## Deterministic Risk Rules (Phase 5)
+
+The deterministic risk rule engine evaluates four specific financial risk patterns explicitly specified in PS06:
+
+1. **R01 — Unusually Large Transfer:**  
+   Triggers when a transaction amount exceeds the customer's historical 95th percentile (`p95`). Operates strictly on historical baseline values and never invents synthetic thresholds.
+
+2. **R02 — Burst of Payments to a Newly Added Payee:**  
+   Triggers when 3 or more transactions are made to a newly observed payee within a 24-hour rolling window of that payee's first appearance in the dataset.
+
+3. **R03 — Odd-Hours Activity:**  
+   Triggers when a transaction occurs during late-night / early-morning hours (00:00:00 to 04:59:59 UTC, inclusive).
+
+4. **R04 — Transaction Breaking the Customer's Established Pattern:**  
+   Triggers when a transaction uses a completely unobserved payment channel (`channel_usage` count == 0) AND has an amount exceeding the customer's historical 75th percentile (`p75`).
+
+*Important: Rule indicators are flags for investigator review and do not constitute proof of fraud.*
 
 ## Customer Baseline Analysis (Phase 4)
 
-The customer baseline represents the customer's established transaction behavior derived strictly from their uploaded transaction history. It provides a deterministic statistical foundation for future risk comparison:
+The customer baseline represents the customer's established transaction behavior derived strictly from their uploaded transaction history. It provides a deterministic statistical foundation for risk comparison:
 
 - **Amount Statistics:** Minimum, maximum, mean, median, 25th, 75th, 90th, and 95th percentiles.
 - **Channel Usage:** Transaction counts and percentage distribution across channels (UPI, NEFT, CARD, etc.).
 - **Payee History:** Historical transaction counts, total amounts, `first_seen`, and `last_seen` timestamps per payee.
 - **Temporal Activity:** Activity breakdown by hour of day (00–23) and day of week (Monday–Sunday).
 - **Daily Frequency:** Active calendar days count, average transactions per active day, maximum daily count, minimum daily count.
-
-*Note: Baseline calculations are purely descriptive and deterministic. No risk rules or fraud classifications are applied in Phase 4.*
 
 ## Current Technology Stack
 - **Language:** Python 3.11+
@@ -131,6 +149,58 @@ Retrieve calculated customer baseline profile.
 }
 ```
 
+### `GET /api/rules`
+Retrieve deterministic risk rule evaluations for the active dataset.
+
+**Evaluated response (200):**
+```json
+{
+  "status": "evaluated",
+  "customer_id": "CUST001",
+  "evaluated_at_transaction_count": 3,
+  "rules": [
+    {
+      "rule_id": "R01",
+      "name": "Unusually Large Transfer",
+      "triggered": true,
+      "transaction_ids": ["TXN003"],
+      "evidence": [
+        {
+          "transaction_id": "TXN003",
+          "field": "amount",
+          "value": "50000.0",
+          "baseline_value": "45120.05",
+          "threshold_value": "45120.05",
+          "comparison": "Amount 50000.0 exceeds customer P95 baseline of 45120.05",
+          "reasoning": "Transaction TXN003 amount of 50000.0 exceeds the customer's 95th percentile baseline threshold of 45120.05."
+        }
+      ]
+    },
+    {
+      "rule_id": "R02",
+      "name": "Burst of Payments to a Newly Added Payee",
+      "triggered": false,
+      "transaction_ids": [],
+      "evidence": []
+    },
+    {
+      "rule_id": "R03",
+      "name": "Odd-Hours Activity",
+      "triggered": false,
+      "transaction_ids": [],
+      "evidence": []
+    },
+    {
+      "rule_id": "R04",
+      "name": "Transaction Breaking Established Pattern",
+      "triggered": false,
+      "transaction_ids": [],
+      "evidence": []
+    }
+  ]
+}
+```
+
 ## Installation
 ```bash
 pip install -r requirements.txt
@@ -151,6 +221,7 @@ pytest tests/ -v
 - **Upload Endpoint:** `POST` [http://localhost:8000/api/upload](http://localhost:8000/api/upload)
 - **Transactions Endpoint:** `GET` [http://localhost:8000/api/transactions](http://localhost:8000/api/transactions)
 - **Baseline Endpoint:** `GET` [http://localhost:8000/api/baseline](http://localhost:8000/api/baseline)
+- **Rules Endpoint:** `GET` [http://localhost:8000/api/rules](http://localhost:8000/api/rules)
 - **Interactive OpenAPI Documentation:** [http://localhost:8000/docs](http://localhost:8000/docs)
 - **ReDoc Documentation:** [http://localhost:8000/redoc](http://localhost:8000/redoc)
 
@@ -172,8 +243,16 @@ PS06-Risk-Investigation/
 │   ├── models/
 │   │   ├── __init__.py
 │   │   ├── transaction.py
-│   │   └── baseline.py
+│   │   ├── baseline.py
+│   │   └── rules.py
 │   ├── rules/
+│   │   ├── __init__.py
+│   │   ├── constants.py
+│   │   ├── r01_unusually_large_transfer.py
+│   │   ├── r02_burst_to_new_payee.py
+│   │   ├── r03_odd_hours_activity.py
+│   │   ├── r04_pattern_deviation.py
+│   │   └── engine.py
 │   ├── ai/
 │   ├── reports/
 │   └── database/
@@ -190,6 +269,13 @@ PS06-Risk-Investigation/
     ├── test_temporal_frequency_baseline.py
     ├── test_baseline_service.py
     ├── test_baseline_edge_cases.py
+    ├── test_rule_models.py
+    ├── test_r01_rule.py
+    ├── test_r02_rule.py
+    ├── test_r03_rule.py
+    ├── test_r04_rule.py
+    ├── test_rule_engine.py
+    ├── test_rule_edge_cases.py
     ├── test_api.py
     └── fixtures/
         ├── valid.csv
@@ -204,5 +290,3 @@ PS06-Risk-Investigation/
         ├── missing_values.csv
         └── normalization.csv
 ```
-
-
