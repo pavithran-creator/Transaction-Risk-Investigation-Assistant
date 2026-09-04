@@ -10,6 +10,18 @@ from src.models.transaction import MAX_UPLOAD_SIZE_BYTES, error_response
 app = FastAPI(title="PS06 Transaction Risk Investigation Assistant")
 
 
+@app.exception_handler(Exception)
+async def global_exception_handler(request, exc):
+    """Ensure no Python stack traces leak to API consumers."""
+    return JSONResponse(
+        status_code=500,
+        content={
+            "valid": False,
+            "errors": ["An unexpected server error occurred while processing the request."],
+        },
+    )
+
+
 @app.get("/")
 def read_root():
     return {"message": "PS06 Transaction Risk Investigation Assistant is running"}
