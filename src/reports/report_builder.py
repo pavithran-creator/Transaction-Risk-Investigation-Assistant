@@ -67,6 +67,87 @@ def validate_transaction_traceability(
     return invalid
 
 
+def compute_transaction_connections(
+    report_txs: List[ReportTransaction]
+) -> List[TransactionConnection]:
+    """
+    Computes factual, data-supported relationships between affected transactions.
+
+    Supported types:
+    - SAME_PAYEE: Multiple affected transactions with identical payee.
+    - SHARED_RULE: Multiple affected transactions triggering the same risk rule.
+    - TEMPORAL_SEQUENCE: Multiple affected transactions occurring within a 15-minute window.
+    """
+    connections: List[TransactionConnection] = []
+    if len(report_txs) < 2:
+        return connections
+
+    # 1. Group by payee
+    payee_groups: dict = {}
+    for tx in report_txs:
+        payee_groups.setdefault(tx.payee, []).append(tx.transaction_id)
+
+    for payee, tx_ids in payee_groups.items():
+        if len(tx_ids) > 1:
+            connections.append(
+                TransactionConnection(
+                    connection_type="SAME_PAYEE",
+                    description=f"Transactions {', '.join(tx_ids)} share the same payee: {payee}.",
+                    transaction_ids=tx_ids
+                )
+            )
+
+    # 2. Group by shared rule
+    rule_groups: dict = {}
+    for tx in report_txs:
+        for r_id in tx.triggered_rules:
+            rule_groups.setdefault(r_id, []).append(tx.transaction_id)
+
+    for r_id, tx_ids in rule_groups.items():
+        if len(tx_ids) > 1:
+            connections.append(
+                TransactionConnection(
+                    connection_type="SHARED_RULE",
+                    description=f"Transactions {', '.join(tx_ids)} triggered the same rule: {r_id}.",
+                    transaction_ids=tx_ids
+                )
+            )
+
+    # 3. Temporal sequence (within 15 minutes)
+    parsed_txs = []
+    for tx in report_txs:
+        try:
+            ts = datetime.fromisoformat(tx.timestamp.replace("Z", "+00:00"))
+            parsed_txs.append((ts, tx))
+        except Exception:
+            pass
+
+    parsed_txs.sort(key=lambda x: x[0])
+
+    if len(parsed_txs) >= 2:
+        burst_txs = []
+        for i in range(len(parsed_txs) - 1):
+            t1, tx1 = parsed_txs[i]
+            t2, tx2 = parsed_txs[i + 1]
+            diff_sec = abs((t2 - t1).total_seconds())
+            if diff_sec <= 900:  # 15 minutes
+                if tx1.transaction_id not in burst_txs:
+                    burst_txs.append(tx1.transaction_id)
+                if tx2.transaction_id not in burst_txs:
+                    burst_txs.append(tx2.transaction_id)
+
+        if len(burst_txs) >= 2:
+            connections.append(
+                TransactionConnection(
+                    connection_type="TEMPORAL_SEQUENCE",
+                    description=f"Transactions {', '.join(burst_txs)} occurred within a short temporal window (<= 15 minutes).",
+                    transaction_ids=burst_txs
+                )
+            )
+
+    return connections
+
+
 def build_deterministic_report(
     dataset: Optional[TransactionDataset],
     baseline: Optional[CustomerBaseline] = None,
@@ -219,6 +300,9 @@ def build_deterministic_report(
         f"historical transactions."
     )
 
+    # Compute data-supported transaction connections
+    transaction_connections = compute_transaction_connections(transactions_requiring_review)
+
     return InvestigationReport(
         customer_id=cust_id,
         generated_at=now_iso,
@@ -229,7 +313,7 @@ def build_deterministic_report(
         triggered_rules=triggered_rules_list,
         non_triggered_rules=non_triggered_rules_list,
         transactions_requiring_review=transactions_requiring_review,
-        transaction_connections=[],  # To be enhanced in Milestone 4
+        transaction_connections=transaction_connections,
         evidence=evidence_items,
         baseline_deviation=baseline_deviations,
         why_attention=why_attention,
