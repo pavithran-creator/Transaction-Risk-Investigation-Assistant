@@ -13,18 +13,51 @@ Financial institutions encounter complex challenges when attempting to detect fi
 > **Phase 5:** Deterministic Risk Rules Engine (R01–R04) — ✅ Complete  
 > **Phase 6:** Deterministic Attention-Level & Evidence Combination Engine — ✅ Complete  
 > **Phase 7:** Grounded Gemini Investigation Explanation Engine — ✅ Complete  
+> **Phase 8:** Structured Investigation Report Generation Engine — ✅ Complete  
 
 The project currently provides:
 - A FastAPI backend server with health-check endpoint (`GET /`).
 - A CSV upload endpoint (`POST /api/upload`) that accepts, validates, and loads transaction CSV files.
 - Single-customer transaction history enforcement (`MULTIPLE_CUSTOMERS_NOT_ALLOWED`).
-- Pydantic domain models (`Transaction`, `TransactionDataset`, `CustomerBaseline`, `RuleResult`, `CustomerAttentionAssessment`, `InvestigationExplanation`, etc.).
+- Pydantic domain models (`Transaction`, `TransactionDataset`, `CustomerBaseline`, `RuleResult`, `CustomerAttentionAssessment`, `InvestigationExplanation`, `InvestigationReport`, etc.).
 - Automatic chronological ordering of transactions with deterministic secondary sorting by `transaction_id`.
 - Transaction retrieval endpoint (`GET /api/transactions`) exposing loaded in-memory transaction history.
 - Customer baseline analysis endpoint (`GET /api/baseline`) returning deterministic historical behavior profile.
 - Deterministic risk rules evaluation endpoint (`GET /api/rules`) evaluating R01–R04 with rule evidence and indicators.
 - Deterministic attention level assessment endpoint (`GET /api/attention`) combining rule evidence for investigator prioritization.
 - Grounded Gemini investigation explanation endpoint (`GET /api/investigation`) providing natural-language investigator explanations strictly derived from deterministic evidence.
+- Structured investigation report endpoint (`GET /api/report`) generating comprehensive, traceable investigation reports for compliance teams.
+
+## Structured Investigation Report Generation (Phase 8)
+
+Phase 8 implements the complete **Investigation Report Generator** answering all PS06 investigation requirements.
+
+```text
+Transaction History
+        ↓
+Customer Baseline (Phase 4)
+        ↓
+Risk Rules R01–R04 (Phase 5)
+        ↓
+Attention Level (Phase 6)
+        ↓
+Gemini Grounded Explanation (Phase 7)
+        ↓
+Structured Investigation Report Assembly (Phase 8)
+        ↓
+GET /api/report
+```
+
+### Key Features & Guarantees
+- **Answer PS06 Core Questions:**
+  1. *First Finding:* Clear statement answering "Does anything need attention?" (`first_finding`).
+  2. *Traceable Transactions:* Preserves original `transaction_id`, `timestamp`, `description`, `payee`, `amount`, `channel`, and merged `triggered_rules`.
+  3. *Transaction Connections:* Identifies data-supported factual relationships (`SAME_PAYEE`, `SHARED_RULE`, `TEMPORAL_SEQUENCE`).
+  4. *Rule Transparency:* Lists all triggered rules with deterministic evidence as well as non-triggered rules.
+  5. *Customer Baseline Deviation:* Contrasts transactions against customer's historical P95, channel usage, and temporal patterns.
+  6. *Investigator Review Priorities & Suggested Checks:* Actionable next steps and initial priority guidance.
+  7. *Safety Statement:* Enforces non-accusatory disclaimer stating the system does not establish fraud.
+- **Deterministic Authority:** LLM output never overrides deterministic attention levels, transaction IDs, amounts, or rule triggers. If Gemini is unavailable, deterministic evidence remains 100% intact.
 
 ## Grounded Gemini Investigation Explanation (Phase 7)
 
