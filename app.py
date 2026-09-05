@@ -1,5 +1,6 @@
-from fastapi import FastAPI, File, UploadFile
-from fastapi.responses import JSONResponse
+from fastapi import FastAPI, File, Request, UploadFile
+from fastapi.responses import FileResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
 import uvicorn
 
 from src.analytics.attention_engine import evaluate_attention
@@ -16,6 +17,8 @@ from src.rules.engine import evaluate_all_rules
 
 app = FastAPI(title="PS06 Transaction Risk Investigation Assistant")
 
+app.mount("/static", StaticFiles(directory="frontend"), name="static")
+
 
 @app.exception_handler(Exception)
 async def global_exception_handler(request, exc):
@@ -30,8 +33,20 @@ async def global_exception_handler(request, exc):
 
 
 @app.get("/")
-def read_root():
+def read_root(request: Request):
+    """
+    Root endpoint: returns HTML for browser navigation or JSON status for API requests.
+    """
+    accept = request.headers.get("accept", "")
+    if "text/html" in accept:
+        return FileResponse("frontend/index.html")
     return {"message": "PS06 Transaction Risk Investigation Assistant is running"}
+
+
+@app.get("/dashboard")
+@app.get("/app")
+def read_dashboard():
+    return FileResponse("frontend/index.html")
 
 
 @app.post("/api/upload")

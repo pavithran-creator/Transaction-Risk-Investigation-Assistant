@@ -14,12 +14,13 @@ Financial institutions encounter complex challenges when attempting to detect fi
 > **Phase 6:** Deterministic Attention-Level & Evidence Combination Engine — ✅ Complete  
 > **Phase 7:** Grounded Gemini Investigation Explanation Engine — ✅ Complete  
 > **Phase 8:** Structured Investigation Report Generation Engine — ✅ Complete  
+> **Phase 9:** Grounded Evidence Retrieval Engine — ✅ Complete  
 
 The project currently provides:
 - A FastAPI backend server with health-check endpoint (`GET /`).
 - A CSV upload endpoint (`POST /api/upload`) that accepts, validates, and loads transaction CSV files.
 - Single-customer transaction history enforcement (`MULTIPLE_CUSTOMERS_NOT_ALLOWED`).
-- Pydantic domain models (`Transaction`, `TransactionDataset`, `CustomerBaseline`, `RuleResult`, `CustomerAttentionAssessment`, `InvestigationExplanation`, `InvestigationReport`, etc.).
+- Pydantic domain models (`Transaction`, `TransactionDataset`, `CustomerBaseline`, `RuleResult`, `CustomerAttentionAssessment`, `InvestigationExplanation`, `InvestigationReport`, `EvidenceDocument`, etc.).
 - Automatic chronological ordering of transactions with deterministic secondary sorting by `transaction_id`.
 - Transaction retrieval endpoint (`GET /api/transactions`) exposing loaded in-memory transaction history.
 - Customer baseline analysis endpoint (`GET /api/baseline`) returning deterministic historical behavior profile.
@@ -27,6 +28,27 @@ The project currently provides:
 - Deterministic attention level assessment endpoint (`GET /api/attention`) combining rule evidence for investigator prioritization.
 - Grounded Gemini investigation explanation endpoint (`GET /api/investigation`) providing natural-language investigator explanations strictly derived from deterministic evidence.
 - Structured investigation report endpoint (`GET /api/report`) generating comprehensive, traceable investigation reports for compliance teams.
+- Grounded evidence retrieval engine (`EvidenceRetrievalService`) leveraging `gemini-embedding-001` and an in-memory `LocalEvidenceIndex` using cosine similarity.
+
+## Grounded Evidence Retrieval (Phase 9)
+
+Phase 9 adds a searchable, vector-indexed evidence layer using Gemini's official embedding model: `gemini-embedding-001`.
+
+```text
+Investigation Evidence (Transactions, Baseline, Rules, Attention)
+                                ↓
+                 Gemini Embedding (gemini-embedding-001)
+                                ↓
+                 In-Memory Local Index (numpy Cosine Similarity)
+                                ↓
+                 Semantic Search & Traceable Citation Retrieval
+```
+
+### Key Principles & Architecture
+- **Embeddings Do NOT Replace Deterministic Analysis:** Embeddings are used exclusively for evidence discovery and semantic context retrieval. Deterministic rule evaluations, baseline metrics, and Phase 6 attention levels remain authoritative.
+- **Traceable Citations:** Every retrieved evidence document retains direct citations (`[EVD_TXN_001] Source: transaction (TXN001)`) linking back to original dataset attributes (`transaction_ids`, `rule_ids`, `customer_id`).
+- **Lightweight Local Index:** Operates in memory using `numpy` vector dot products. Uses zero external vector databases (no Pinecone, Weaviate, or Chroma).
+- **Graceful Failure Handling:** If `GEMINI_API_KEY` is missing or embedding generation fails, deterministic endpoints (`/api/rules`, `/api/attention`, `/api/report`) operate without interruption.
 
 ## Structured Investigation Report Generation (Phase 8)
 

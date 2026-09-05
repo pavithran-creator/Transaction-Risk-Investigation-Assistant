@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PS06 – Banking Transaction Risk Investigation Assistant</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+
+  <!-- Top Navigation Header -->
+  <header class="header">
+    <div class="header-container">
+      <div class="brand-section">
+        <span class="brand-badge">PS06</span>
+        <div>
+          <div class="brand-title">Banking Transaction Risk Investigation Assistant</div>
+          <div class="brand-subtitle">Automated Evidence Assembly & Grounded Intelligence Terminal</div>
+        </div>
+      </div>
+      <div class="status-section">
+        <div class="engine-status" id="engine-status">
+          <span class="pulse-dot"></span> Ready
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Case Metadata Bar -->
+  <div class="case-bar">
+    <div class="case-container">
+      <div class="case-info">
+        <span style="color:var(--text-muted);font-size:0.8rem;font-weight:600;">CASE REF:</span>
+        <span class="case-ref" id="case-ref-id">NXS-PS06-000000</span>
+        <span style="color:var(--text-muted);font-size:0.8rem;font-weight:600;margin-left:0.5rem;">CUSTOMER:</span>
+        <strong style="color:white;font-size:0.9rem;" id="case-customer-id">—</strong>
+        <span class="attention-badge badge-insufficient" id="attention-badge">AWAITING UPLOAD</span>
+      </div>
+      <div class="action-buttons">
+        <button class="btn btn-secondary" id="btn-reset">Reset Workflow</button>
+        <button class="btn btn-primary" onclick="document.getElementById('attention-banner').scrollIntoView({behavior:'smooth'})">Jump to Findings</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Dashboard Container -->
+  <main class="main-content">
+
+    <!-- STEP 01: Upload Transaction History & Ingestion -->
+    <section class="step-card">
+      <div class="step-header">
+        <div>
+          <span class="step-tag">STEP 01</span>
+          <span class="step-title">Upload Transaction History & Ingestion</span>
+        </div>
+        <span style="font-size:0.8rem;color:var(--text-muted);">Deterministic Status: In-Memory Ledger</span>
+      </div>
+
+      <div class="upload-grid">
+        <!-- Drag & Drop Zone -->
+        <div>
+          <div class="dropzone-box" id="dropzone-box">
+            <div class="upload-icon">📁</div>
+            <div>
+              <strong style="font-size:1.05rem;color:var(--text-primary);">Drag and drop bank ledger CSV</strong>
+              <div style="font-size:0.8rem;color:var(--text-muted);margin-top:0.25rem;">
+                Supports multi-column banking exports up to 10 MB (UTF-8)
+              </div>
+            </div>
+            <button class="btn btn-outline" type="button">Browse System Files</button>
+            <input type="file" id="csv-file-input" accept=".csv" class="hidden">
+          </div>
+
+          <div id="file-info-card" class="file-info-card hidden" style="margin-top:1rem;">
+            <div>
+              <div id="selected-file-name" style="font-weight:700;font-size:0.9rem;">filename.csv</div>
+              <div id="selected-file-size" style="font-size:0.75rem;color:var(--text-muted);">0 KB</div>
+            </div>
+            <button class="btn btn-primary" id="btn-analyze">Analyze Transactions</button>
+          </div>
+
+          <div style="margin-top:1rem;">
+            <span style="font-size:0.75rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;">REQUIRED 7 CORE COLUMNS:</span>
+            <div class="schema-checklist">
+              <span class="schema-tag">transaction_id</span>
+              <span class="schema-tag">customer_id</span>
+              <span class="schema-tag">timestamp</span>
+              <span class="schema-tag">description</span>
+              <span class="schema-tag">payee</span>
+              <span class="schema-tag">amount</span>
+              <span class="schema-tag">channel</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Real-Time Ingestion Pipeline Panel -->
+        <div class="pipeline-panel">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <strong style="font-size:0.95rem;">Real-Time Ingestion Pipeline</strong>
+            <span style="font-size:0.75rem;color:var(--text-muted);font-weight:600;">STAGE 1-6</span>
+          </div>
+
+          <div class="pipeline-list">
+            <div class="pipeline-step" id="p-step-1">
+              <span>Transaction Validation & Deduplication</span>
+              <span class="step-indicator waiting">1</span>
+            </div>
+            <div class="pipeline-step" id="p-step-2">
+              <span>Baseline Statistical Calculation</span>
+              <span class="step-indicator waiting">2</span>
+            </div>
+            <div class="pipeline-step" id="p-step-3">
+              <span>Deterministic Risk Rules Evaluation (R01-R04)</span>
+              <span class="step-indicator waiting">3</span>
+            </div>
+            <div class="pipeline-step" id="p-step-4">
+              <span>Attention Trigger Calibration</span>
+              <span class="step-indicator waiting">4</span>
+            </div>
+            <div class="pipeline-step" id="p-step-5">
+              <span>Gemini Grounded Traceability Matrix</span>
+              <span class="step-indicator waiting">5</span>
+            </div>
+            <div class="pipeline-step" id="p-step-6">
+              <span>Evidence Dossier & Report Assembly</span>
+              <span class="step-indicator waiting">6</span>
+            </div>
+          </div>
+
+          <div style="margin-top:1rem;font-size:0.75rem;color:var(--text-muted);background:var(--bg-card);padding:0.75rem;border-radius:var(--radius-sm);border:1px solid var(--border-color);">
+            🔒 <strong>Confidential & Secure:</strong> All transaction history is analyzed locally in memory against established account activity patterns. No unencrypted ledger records are retained.
+          </div>
+        </div>
+      </div>
+
+      <!-- Error Banner -->
+      <div id="error-banner" class="error-banner hidden">
+        <strong>Validation Error:</strong> <span id="error-text">An error occurred.</span>
+      </div>
+    </section>
+
+    <!-- STEP 02: Customer Baseline & Longitudinal Behavior -->
+    <section class="step-card hidden" id="section-baseline">
+      <div class="step-header">
+        <div>
+          <span class="step-tag">STEP 02</span>
+          <span class="step-title">Customer Baseline & Longitudinal Behavior</span>
+        </div>
+        <span style="font-size:0.8rem;color:var(--text-muted);">Active Window: Loaded History</span>
+      </div>
+
+      <!-- Metrics Grid -->
+      <div class="baseline-metrics-grid">
+        <div class="metric-card">
+          <div class="metric-label">TOTAL TRANSACTIONS</div>
+          <div class="metric-value" id="stat-tx-count">0</div>
+          <div class="metric-sub">Verified Ledger Rows</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">MIN AMOUNT</div>
+          <div class="metric-value" id="stat-min">₹0.00</div>
+          <div class="metric-sub">Lowest Settlement</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">MAX AMOUNT</div>
+          <div class="metric-value" id="stat-max">₹0.00</div>
+          <div class="metric-sub">Peak Settlement</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">MEAN VALUE</div>
+          <div class="metric-value" id="stat-mean">₹0.00</div>
+          <div class="metric-sub">Average Activity</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">MEDIAN (P50)</div>
+          <div class="metric-value" id="stat-median">₹0.00</div>
+          <div class="metric-sub">Central Cluster</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">P95 CUTOFF LIMIT</div>
+          <div class="metric-value" id="stat-p95" style="color:#f59e0b;">₹0.00</div>
+          <div class="metric-sub">R01 Trigger Threshold</div>
+        </div>
+      </div>
+
+      <!-- Charts Grid -->
+      <div class="baseline-charts-grid">
+        <!-- Channel Usage Breakdown -->
+        <div class="chart-card">
+          <div class="chart-title">
+            <span>Channel Usage Breakdown</span>
+            <span style="font-size:0.75rem;color:var(--text-muted);font-weight:normal;">Payment Channels</span>
+          </div>
+          <div class="channel-bar-list" id="channel-bars-list">
+            <!-- Populated dynamically -->
+          </div>
+        </div>
+
+        <!-- Hourly Distribution Chart -->
+        <div class="chart-card">
+          <div class="chart-title">
+            <span>Hourly Activity Distribution (00:00 - 23:00)</span>
+            <span style="font-size:0.75rem;color:#ef4444;font-weight:600;">● Off-Hours (00:00-05:00)</span>
+          </div>
+          <div class="hourly-bar-container" id="hourly-chart-bars">
+            <!-- Populated dynamically -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Counterparty Matrix Table -->
+      <div class="chart-card">
+        <div class="chart-title">
+          <span>Dominant Counterparty Interaction Matrix</span>
+          <span style="font-size:0.75rem;color:var(--text-muted);font-weight:normal;">Top Payee Entities</span>
+        </div>
+        <div class="data-table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Counterparty / Payee</th>
+                <th>Historical Txs</th>
+                <th>Cumulative Volume</th>
+                <th>Mean Settlement</th>
+              </tr>
+            </thead>
+            <tbody id="payee-table-body">
+              <!-- Populated dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- STEP 03: Forensic Investigation Report & Risk Rules -->
+    <section class="step-card hidden" id="section-rules">
+      <div class="step-header">
+        <div>
+          <span class="step-tag">STEP 03</span>
+          <span class="step-title">Forensic Investigation & Deterministic Risk Rules</span>
+        </div>
+        <span style="font-size:0.8rem;color:var(--text-muted);">Deterministic Evaluation</span>
+      </div>
+
+      <!-- Attention Banner -->
+      <div class="attention-banner attention" id="attention-banner">
+        <div style="font-size:0.8rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;">
+          FIRST FINDING — INVESTIGATION ASSESSMENT
+        </div>
+        <div class="first-finding-text" id="banner-first-finding">ATTENTION RECOMMENDED</div>
+        <div style="margin-top:0.5rem;font-size:0.95rem;" id="banner-reason">
+          Evaluating deterministic rule evidence against customer baseline profile.
+        </div>
+      </div>
+
+      <!-- Rule Cards Grid (R01 - R04) -->
+      <div style="font-size:0.9rem;font-weight:700;margin-bottom:0.75rem;">Deterministic Risk Rule Results (R01–R04)</div>
+      <div class="rules-grid" id="rules-cards-grid">
+        <!-- Populated dynamically -->
+      </div>
+    </section>
+
+    <!-- STEP 04, 05, 06: Full Report & Gemini Directives -->
+    <section class="step-card hidden" id="section-report">
+      <div class="step-header">
+        <div>
+          <span class="step-tag">STEP 04</span>
+          <span class="step-title">Transactions Requiring Review & Traceability</span>
+        </div>
+        <span style="font-size:0.8rem;color:var(--text-muted);">Investigator Review List</span>
+      </div>
+
+      <!-- Review Table -->
+      <div class="data-table-container" style="margin-bottom:1.5rem;">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Transaction ID</th>
+              <th>Timestamp</th>
+              <th>Description</th>
+              <th>Payee</th>
+              <th>Amount</th>
+              <th>Channel</th>
+              <th>Triggered Rules</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="review-tx-table-body">
+            <!-- Populated dynamically -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Connections Box -->
+      <div style="margin-bottom:1.5rem;">
+        <div style="font-size:0.9rem;font-weight:700;margin-bottom:0.5rem;">Transaction Connections</div>
+        <div id="connections-container">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+
+      <!-- Gemini Grounded Analysis Panel -->
+      <div class="gemini-panel">
+        <div class="gemini-header">
+          <span>✨ Gemini Grounded Risk Analysis & Investigator Guidance</span>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:1.25rem;">
+          <div>
+            <h4 style="font-size:0.85rem;color:var(--accent-blue);margin-bottom:0.4rem;">Investigation Assessment</h4>
+            <div id="gemini-assessment" style="font-size:0.9rem;line-height:1.6;">—</div>
+          </div>
+          <div>
+            <h4 style="font-size:0.85rem;color:#f59e0b;margin-bottom:0.4rem;">Why This Needs Attention</h4>
+            <div id="gemini-why" style="font-size:0.9rem;line-height:1.6;">—</div>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:1.25rem;">
+          <div>
+            <h4 style="font-size:0.85rem;color:#10b981;margin-bottom:0.4rem;">Context That May Reduce Concern</h4>
+            <div id="gemini-reducing" style="font-size:0.9rem;line-height:1.6;">—</div>
+          </div>
+          <div>
+            <h4 style="font-size:0.85rem;color:#a78bfa;margin-bottom:0.4rem;">What Investigator Should Look At First (Priority)</h4>
+            <div class="directive-box">
+              <strong id="gemini-priority" style="font-size:0.9rem;color:white;">—</strong>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <h4 style="font-size:0.85rem;color:var(--text-secondary);margin-bottom:0.4rem;">Actionable Suggested Investigator Checks</h4>
+          <ul id="gemini-suggested-checks" style="font-size:0.85rem;padding-left:1.25rem;line-height:1.7;color:var(--text-primary);">
+            <!-- Populated dynamically -->
+          </ul>
+        </div>
+
+        <!-- Mandatory Safety Statement -->
+        <div class="safety-disclaimer" id="report-safety-statement">
+          This analysis highlights transaction patterns that may warrant investigation. It does not establish that fraud occurred. Final judgment should be made by an investigator using available transaction and customer context.
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Transaction Inspection Modal -->
+  <div class="modal-overlay" id="modal-overlay">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h3 id="modal-title" style="font-size:1.1rem;color:white;">Inspect Transaction</h3>
+        <button class="close-btn" id="modal-close-btn">&times;</button>
+      </div>
+      <div id="modal-body">
+        <!-- Populated dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Custom JS -->
+  <script src="/static/app.js"></script>
+</body>
+</html>
