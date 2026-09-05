@@ -210,17 +210,29 @@ def generate_investigation_explanation(
 
     try:
         raw_text = invoke_gemini_explanation(prompt)
-    except (GeminiKeyMissingError, GeminiAPIError, Exception) as exc:
+    except (GeminiKeyMissingError, GeminiAPIError) as exc:
         return _generate_fallback_explanation(
             context,
             reason="Gemini API error",
             error_message=f"Gemini generation failed: {str(exc)}"
         )
+    except Exception as exc:
+        return _generate_fallback_explanation(
+            context,
+            reason="Gemini API error",
+            error_message=f"Gemini generation failed unexpectedly: {str(exc)}"
+        )
 
-    explanation = _parse_gemini_markdown_response(raw_text, context)
+    try:
+        explanation = _parse_gemini_markdown_response(raw_text, context)
+        is_valid, errors = validate_explanation_grounding(explanation, context)
+    except Exception as exc:
+        return _generate_fallback_explanation(
+            context,
+            reason="Invalid Gemini response",
+            error_message=f"Gemini response could not be processed: {str(exc)}"
+        )
 
-    # Validate grounding
-    is_valid, errors = validate_explanation_grounding(explanation, context)
     if not is_valid:
         explanation.valid = False
         explanation.error_message = f"Grounding validation failed: {'; '.join(errors)}"

@@ -18,6 +18,34 @@ Financial institutions encounter complex challenges when attempting to detect fi
 > **Phase 9:** Grounded Evidence Retrieval Engine — ✅ Complete  
 > **Phase 10 & 11:** Investigation Dashboard Frontend & End-to-End API Integration — ✅ Complete  
 
+## Installation and Running
+
+Open **Command Prompt** and run these commands from the project directory.
+
+### First-time installation
+
+```cmd
+cd /d "e:\project\hacka\Banking Transaction Risk Investigation Assistant"
+py -m pip install -r requirements.txt
+py app.py
+```
+
+The last command starts the application. Open http://localhost:8000 for the dashboard or http://localhost:8000/docs for the API documentation.
+
+### Install and run with one command
+
+```cmd
+cd /d "e:\project\hacka\Banking Transaction Risk Investigation Assistant" && py -m pip install -r requirements.txt && py app.py
+```
+
+### Run after installation
+
+```cmd
+cd /d "e:\project\hacka\Banking Transaction Risk Investigation Assistant" && py app.py
+```
+
+If the `py` command is unavailable, replace `py` with `python`.
+
 The project currently provides:
 - A FastAPI backend server with health-check endpoint (`GET /`).
 - Single-page enterprise compliance dashboard hosted at `/` or `/dashboard`.

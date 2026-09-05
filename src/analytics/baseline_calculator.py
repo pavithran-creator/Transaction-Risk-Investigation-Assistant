@@ -33,7 +33,14 @@ def calculate_amount_statistics(amounts: List[float]) -> Optional[AmountStatisti
     if not amounts:
         return None
 
-    clean_amounts = [float(a) for a in amounts if a is not None and math.isfinite(float(a))]
+    clean_amounts = []
+    for amount in amounts:
+        try:
+            numeric_amount = float(amount)
+        except (TypeError, ValueError):
+            continue
+        if math.isfinite(numeric_amount):
+            clean_amounts.append(numeric_amount)
     if not clean_amounts:
         return None
 
@@ -206,6 +213,10 @@ def build_customer_baseline(
     """
     if not dataset or dataset.transaction_count == 0:
         return None
+
+    if not isinstance(historical_ratio, (int, float)) or not math.isfinite(historical_ratio):
+        historical_ratio = 0.8
+    historical_ratio = min(max(float(historical_ratio), 0.0), 1.0)
 
     cust_id = dataset.customer_id or (dataset.customer_ids[0] if dataset.customer_ids else "UNKNOWN")
     transactions = sorted(dataset.transactions, key=lambda t: (t.timestamp, t.transaction_id))
