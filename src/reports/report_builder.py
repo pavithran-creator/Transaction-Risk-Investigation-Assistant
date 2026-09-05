@@ -23,6 +23,50 @@ from src.models.transaction import TransactionDataset
 from src.rules.engine import evaluate_all_rules
 
 
+def build_report_transactions(
+    dataset: TransactionDataset,
+    attention: CustomerAttentionAssessment,
+) -> List[ReportTransaction]:
+    """
+    Maps affected transactions to ReportTransaction models.
+
+    Merges multiple triggered rules for the same transaction into a single ReportTransaction,
+    preserving exact original fields (transaction_id, timestamp, description, payee, amount, channel).
+    """
+    tx_by_id = {t.transaction_id: t for t in dataset.transactions}
+    report_txs: List[ReportTransaction] = []
+
+    for tx_att in attention.transactions:
+        orig_tx = tx_by_id.get(tx_att.transaction_id)
+        if orig_tx:
+            ts_str = orig_tx.timestamp.isoformat() if hasattr(orig_tx.timestamp, "isoformat") else str(orig_tx.timestamp)
+            report_txs.append(
+                ReportTransaction(
+                    transaction_id=orig_tx.transaction_id,
+                    timestamp=ts_str,
+                    description=orig_tx.description,
+                    payee=orig_tx.payee,
+                    amount=orig_tx.amount,
+                    channel=orig_tx.channel,
+                    triggered_rules=list(dict.fromkeys(tx_att.triggered_rules)),
+                )
+            )
+    return report_txs
+
+
+def validate_transaction_traceability(
+    report_txs: List[ReportTransaction],
+    dataset: TransactionDataset,
+) -> List[str]:
+    """
+    Validates that every transaction in the report exists in the source dataset.
+    Returns list of invalid transaction IDs if any exist.
+    """
+    valid_ids = {t.transaction_id for t in dataset.transactions}
+    invalid = [tx.transaction_id for tx in report_txs if tx.transaction_id not in valid_ids]
+    return invalid
+
+
 def build_deterministic_report(
     dataset: Optional[TransactionDataset],
     baseline: Optional[CustomerBaseline] = None,
@@ -97,26 +141,16 @@ def build_deterministic_report(
                 "status": "Not Triggered",
             })
 
-    # Map affected transactions requiring review
-    tx_by_id = {t.transaction_id: t for t in dataset.transactions}
-    transactions_requiring_review: List[ReportTransaction] = []
-    source_tx_ids = []
+    # Map affected transactions requiring review using traceability helper
+    transactions_requiring_review = build_report_transactions(dataset, attention)
+    source_tx_ids = [tx.transaction_id for tx in transactions_requiring_review]
 
-    for tx_att in attention.transactions:
-        orig_tx = tx_by_id.get(tx_att.transaction_id)
-        if orig_tx:
-            source_tx_ids.append(orig_tx.transaction_id)
-            transactions_requiring_review.append(
-                ReportTransaction(
-                    transaction_id=orig_tx.transaction_id,
-                    timestamp=orig_tx.timestamp.isoformat(),
-                    description=orig_tx.description,
-                    payee=orig_tx.payee,
-                    amount=orig_tx.amount,
-                    channel=orig_tx.channel,
-                    triggered_rules=tx_att.triggered_rules,
-                )
-            )
+    # Validate traceability
+    invalid_txs = validate_transaction_traceability(transactions_requiring_review, dataset)
+    if invalid_txs:
+        # Exclude invalid transaction IDs if any
+        transactions_requiring_review = [tx for tx in transactions_requiring_review if tx.transaction_id not in invalid_txs]
+        source_tx_ids = [tx.transaction_id for tx in transactions_requiring_review]
 
     # Collect deterministic evidence items and baseline deviations
     evidence_items: List[ReportEvidence] = []
