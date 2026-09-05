@@ -1,0 +1,7 @@
+transaction_id,customer_id,timestamp,description,payee,amount,channel
+T08-0001,CUST-1008,2026-08-21 13:19:38,Electricity bill,MetroMart,826.98,CARD
+T08-0002,CUST-1008,2026-08-26 19:48:00,Restaurant payment,GreenBasket,1487.48,ATM
+T08-0003,CUST-1008,2026-08-27 11:34:51,Monthly rent,GreenBasket,1242.43,CARD
+T08-0004,CUST-1008,2026-08-28 18:20:30,School fee,City Utilities,1592.65,UPI
+T08-0005,CUST-1008,2026-08-30 13:13:12,Utility payment,MetroMart,1285.34,ATM
+T08-0006,CUST-1008,2026-08-31 19:22:25,Utility payment,City Utilities,966.95,UPI

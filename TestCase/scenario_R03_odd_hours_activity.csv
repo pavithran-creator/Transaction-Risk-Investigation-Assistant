@@ -1,0 +1,46 @@
+transaction_id,customer_id,timestamp,description,payee,amount,channel
+TXN0001,CUST001,2026-01-05 09:00:00,Monthly grocery purchase,GreenMart,1850,UPI
+TXN0002,CUST001,2026-01-07 10:07:00,Electricity bill payment,Metro Utilities,2450,UPI
+TXN0003,CUST001,2026-01-09 11:14:00,Fuel purchase,Sunrise Fuel,2200,CARD
+TXN0004,CUST001,2026-01-11 12:21:00,Monthly rent,Urban Rentals,18000,NEFT
+TXN0005,CUST001,2026-01-13 14:28:00,Fresh grocery purchase,Fresh Foods,1320,UPI
+TXN0006,CUST001,2026-01-15 16:35:00,Mobile utility payment,Connect Mobile,699,UPI
+TXN0007,CUST001,2026-01-17 18:42:00,Online purchase,ABC Electronics,4999,CARD
+TXN0008,CUST001,2026-01-19 20:49:00,Medical payment,City Hospital,7500,CARD
+TXN0009,CUST001,2026-01-21 21:56:00,Pharmacy purchase,Local Pharmacy,1250,UPI
+TXN0010,CUST001,2026-01-23 09:03:00,ATM cash withdrawal,CashPoint ATM,5000,ATM
+TXN0011,CUST001,2026-01-25 10:10:00,Monthly grocery purchase,GreenMart,1850,UPI
+TXN0012,CUST001,2026-01-27 11:17:00,Electricity bill payment,Metro Utilities,2450,UPI
+TXN0013,CUST001,2026-01-29 12:24:00,Fuel purchase,Sunrise Fuel,2200,CARD
+TXN0014,CUST001,2026-01-31 14:31:00,Monthly rent,Urban Rentals,18000,NEFT
+TXN0015,CUST001,2026-02-02 16:38:00,Fresh grocery purchase,Fresh Foods,1320,UPI
+TXN0016,CUST001,2026-02-04 18:45:00,Mobile utility payment,Connect Mobile,699,UPI
+TXN0017,CUST001,2026-02-06 20:52:00,Online purchase,ABC Electronics,4999,CARD
+TXN0018,CUST001,2026-02-08 21:59:00,Medical payment,City Hospital,7500,CARD
+TXN0019,CUST001,2026-02-10 09:06:00,Pharmacy purchase,Local Pharmacy,1250,UPI
+TXN0020,CUST001,2026-02-12 10:13:00,ATM cash withdrawal,CashPoint ATM,5000,ATM
+TXN0021,CUST001,2026-02-14 11:20:00,Monthly grocery purchase,GreenMart,1850,UPI
+TXN0022,CUST001,2026-02-16 12:27:00,Electricity bill payment,Metro Utilities,2450,UPI
+TXN0023,CUST001,2026-02-18 14:34:00,Fuel purchase,Sunrise Fuel,2200,CARD
+TXN0024,CUST001,2026-02-20 16:41:00,Monthly rent,Urban Rentals,18000,NEFT
+TXN0025,CUST001,2026-02-22 18:48:00,Fresh grocery purchase,Fresh Foods,1320,UPI
+TXN0026,CUST001,2026-02-24 20:55:00,Mobile utility payment,Connect Mobile,699,UPI
+TXN0027,CUST001,2026-02-26 21:02:00,Online purchase,ABC Electronics,4999,CARD
+TXN0028,CUST001,2026-02-28 09:09:00,Medical payment,City Hospital,7500,CARD
+TXN0029,CUST001,2026-03-02 10:16:00,Pharmacy purchase,Local Pharmacy,1250,UPI
+TXN0030,CUST001,2026-03-04 11:23:00,ATM cash withdrawal,CashPoint ATM,5000,ATM
+TXN0031,CUST001,2026-03-06 12:30:00,Monthly grocery purchase,GreenMart,1850,UPI
+TXN0032,CUST001,2026-03-08 14:37:00,Electricity bill payment,Metro Utilities,2450,UPI
+TXN0033,CUST001,2026-03-10 16:44:00,Fuel purchase,Sunrise Fuel,2200,CARD
+TXN0034,CUST001,2026-03-12 18:51:00,Monthly rent,Urban Rentals,18000,NEFT
+TXN0035,CUST001,2026-03-14 20:58:00,Fresh grocery purchase,Fresh Foods,1320,UPI
+TXN0036,CUST001,2026-03-16 21:05:00,Mobile utility payment,Connect Mobile,699,UPI
+TXN0037,CUST001,2026-03-18 09:12:00,Online purchase,ABC Electronics,4999,CARD
+TXN0038,CUST001,2026-03-20 10:19:00,Medical payment,City Hospital,7500,CARD
+TXN0039,CUST001,2026-03-22 11:26:00,Pharmacy purchase,Local Pharmacy,1250,UPI
+TXN0040,CUST001,2026-03-24 12:33:00,ATM cash withdrawal,CashPoint ATM,5000,ATM
+TXN0113,CUST001,2026-06-15 00:00:00,Electricity bill payment,Metro Utilities,2450,UPI
+TXN0114,CUST001,2026-06-15 01:30:00,Fuel purchase,Sunrise Fuel,1800,CARD
+TXN0115,CUST001,2026-06-15 02:45:00,Online purchase,ABC Electronics,4999,CARD
+TXN0116,CUST001,2026-06-15 04:59:00,Utility payment,Aqua Services,850,UPI
+TXN0117,CUST001,2026-06-15 05:00:00,Mobile utility payment,Connect Mobile,699,UPI

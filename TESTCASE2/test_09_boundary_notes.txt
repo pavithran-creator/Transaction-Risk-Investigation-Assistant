@@ -1,0 +1,16 @@
+TEST 09 - Boundary Conditions: what each added row is testing
+Computed from this customer's own history: P75 = 1668.47, P95 = 1862.27
+
+- T09-0041 @ 2026-06-22 00:00:00 - exactly 00:00:00, start of odd-hours window (should trigger R03)
+- T09-0042 @ 2026-06-22 04:59:59 - exactly 04:59:59, end of odd-hours window (should trigger R03)
+- T09-0043 @ 2026-06-22 05:00:00 - exactly 05:00:00, first normal hour (should NOT trigger R03)
+- T09-0044 @ 2026-06-22 13:00:00 - amount == P75 ($1668.47), same established channel -> should NOT trigger R04 (needs new channel too)
+- T09-0045 @ 2026-06-22 13:30:00 - amount slightly above P75 ($1751.9) AND new channel BANK_TRANSFER -> should trigger R04
+- T09-0046 @ 2026-06-22 14:00:00 - amount == P95 ($1862.27) exactly -> should NOT trigger R01 (rule requires amount ABOVE the P95-derived threshold, not equal to P95 itself)
+- T09-0047 @ 2026-06-22 14:30:00 - amount well above the P95-derived large-transfer threshold ($5959.26) -> should trigger R01
+- T09-0048 @ 2026-06-23 10:00:00 - first payment to newly-added payee 'FreshCart'
+- T09-0049 @ 2026-06-24 10:00:00 - exactly 24h after previous payment to 'FreshCart' -> tests burst-window boundary (should NOT combine into a burst if the app's window is < 24h)
+- T09-0050 @ 2026-06-25 09:00:00 - first payment to newly-added payee 'GreenBasket'
+- T09-0051 @ 2026-06-26 08:59:00 - 23h59m after previous payment to 'GreenBasket' -> just inside a <24h burst window
+- T09-0052 @ 2026-06-27 12:00:00 - first of two transactions sharing the exact same timestamp
+- T09-0053 @ 2026-06-27 12:00:00 - second transaction with identical timestamp to the previous row (tests same-timestamp handling, not a duplicate-content row since description/amount differ)

@@ -1,0 +1,42 @@
+transaction_id,customer_id,timestamp,description,payee,amount,channel
+T03-0001,CUST-1003,2026-02-01 16:54:24,Restaurant payment,MetroMart,1508.87,UPI
+T03-0002,CUST-1003,2026-02-03 18:40:41,Monthly rent,GreenBasket,1168.31,CARD
+T03-0003,CUST-1003,2026-02-07 11:21:16,School fee,City Utilities,1256.72,UPI
+T03-0004,CUST-1003,2026-02-09 16:17:43,Transfer to savings,MetroMart,1280.37,NEFT
+T03-0005,CUST-1003,2026-02-10 19:31:18,Online purchase,Apex Rentals,972.04,UPI
+T03-0006,CUST-1003,2026-02-12 17:12:19,Restaurant payment,MetroMart,1374.04,UPI
+T03-0007,CUST-1003,2026-02-27 13:29:04,Restaurant payment,Apex Rentals,1596.51,NEFT
+T03-0008,CUST-1003,2026-03-02 10:37:05,Transfer to savings,GreenBasket,1288.75,CARD
+T03-0009,CUST-1003,2026-03-03 13:23:08,Electricity bill,Apex Rentals,674.65,IMPS
+T03-0010,CUST-1003,2026-03-04 12:31:57,Insurance payment,Nova Telecom,1265.61,UPI
+T03-0011,CUST-1003,2026-03-05 11:00:31,Insurance payment,Nova Telecom,1247.02,IMPS
+T03-0012,CUST-1003,2026-03-06 15:20:07,Grocery purchase,City Utilities,1456.49,IMPS
+T03-0013,CUST-1003,2026-03-31 14:53:25,Salary credit,MetroMart,1151.26,IMPS
+T03-0014,CUST-1003,2026-04-02 13:23:04,Insurance payment,Nova Telecom,671.36,CARD
+T03-0015,CUST-1003,2026-04-04 10:23:59,Online purchase,Nova Telecom,1448.34,UPI
+T03-0016,CUST-1003,2026-04-06 19:18:40,Salary credit,GreenBasket,1106.9,IMPS
+T03-0017,CUST-1003,2026-04-09 15:32:20,ATM withdrawal,GreenBasket,1369.42,UPI
+T03-0018,CUST-1003,2026-04-10 19:25:58,Mobile recharge,Apex Rentals,990.72,NEFT
+T03-0019,CUST-1003,2026-04-13 20:05:03,Restaurant payment,Nova Telecom,1177.03,IMPS
+T03-0020,CUST-1003,2026-04-22 16:03:58,Utility payment,Apex Rentals,1191.7,NEFT
+T03-0021,CUST-1003,2026-04-25 16:26:21,Online purchase,City Utilities,1282.27,IMPS
+T03-0022,CUST-1003,2026-04-26 15:41:15,Restaurant payment,City Utilities,1791.22,CARD
+T03-0023,CUST-1003,2026-04-29 19:25:07,Electricity bill,GreenBasket,1407.93,ATM
+T03-0024,CUST-1003,2026-05-05 17:14:28,Restaurant payment,City Utilities,1474.06,ATM
+T03-0025,CUST-1003,2026-05-06 11:35:12,Monthly rent,GreenBasket,1474.18,IMPS
+T03-0026,CUST-1003,2026-05-07 12:23:16,Salary credit,Apex Rentals,1640.23,UPI
+T03-0027,CUST-1003,2026-05-08 20:55:26,Insurance payment,Nova Telecom,1294.62,IMPS
+T03-0028,CUST-1003,2026-05-14 14:48:03,Online purchase,Nova Telecom,1094.08,CARD
+T03-0029,CUST-1003,2026-05-16 14:08:43,Mobile recharge,Apex Rentals,889.61,NEFT
+T03-0030,CUST-1003,2026-05-24 10:17:57,Insurance payment,GreenBasket,865.03,ATM
+T03-0031,CUST-1003,2026-05-25 19:28:27,Grocery purchase,City Utilities,1520.07,ATM
+T03-0032,CUST-1003,2026-05-27 18:31:00,Insurance payment,MetroMart,1526.37,CARD
+T03-0033,CUST-1003,2026-05-29 16:28:15,Salary credit,MetroMart,1506.17,UPI
+T03-0034,CUST-1003,2026-06-02 20:44:41,Monthly rent,Nova Telecom,1600.83,CARD
+T03-0035,CUST-1003,2026-06-05 09:00:50,Salary credit,GreenBasket,1224.72,IMPS
+T03-0036,CUST-1003,2026-06-08 11:40:16,Electricity bill,Apex Rentals,1264.93,ATM
+T03-0037,CUST-1003,2026-06-09 20:48:07,Monthly rent,MetroMart,1076.23,NEFT
+T03-0038,CUST-1003,2026-06-10 15:16:14,Grocery purchase,Apex Rentals,1983.59,UPI
+T03-0039,CUST-1003,2026-06-13 11:00:00,Online purchase,Horizon Supplies,950.0,UPI
+T03-0040,CUST-1003,2026-06-13 15:00:00,Online purchase,Horizon Supplies,1100.0,UPI
+T03-0041,CUST-1003,2026-06-13 20:00:00,Online purchase,Horizon Supplies,875.0,IMPS

@@ -19,25 +19,37 @@ def evaluate_r04_established_pattern_deviation(
     """
     Evaluate R04 against customer transactions and baseline.
 
-    Triggers if a transaction uses a payment channel never previously observed in the baseline
+    Triggers if a transaction uses a payment channel never previously observed prior to that transaction
     AND its amount exceeds the customer's P75 baseline amount threshold.
     """
     rule_id = "R04"
     rule_name = "Established Pattern Deviation"
 
-    if not baseline or not baseline.amount_statistics or not baseline.channel_usage:
+    if not baseline or not baseline.amount_statistics:
         return RuleResult(rule_id=rule_id, name=rule_name, triggered=False, transaction_ids=[], evidence=[])
 
     p75_val = baseline.amount_statistics.p75
     if p75_val is None:
         return RuleResult(rule_id=rule_id, name=rule_name, triggered=False, transaction_ids=[], evidence=[])
 
-    historical_channels = set(baseline.channel_usage.keys())
+    # Establish baseline channel counts prior to evaluation
+    prior_counts = {}
+    if baseline.channel_usage:
+        for ch, usage in baseline.channel_usage.items():
+            # If baseline count matches full transaction set, a single-occurrence channel was introduced in evaluation
+            if baseline.transaction_count == len(transactions) and usage.count == 1:
+                prior_counts[ch] = 0
+            else:
+                prior_counts[ch] = usage.count
 
     evidence: List[RuleEvidence] = []
-    for t in transactions:
-        is_new_channel = t.channel not in historical_channels
-        is_above_p75 = t.amount > p75_val
+    # Sort transactions chronologically to track channel evolution
+    sorted_txs = sorted(transactions, key=lambda t: (t.timestamp, t.transaction_id))
+
+    for t in sorted_txs:
+        current_prior_count = prior_counts.get(t.channel, 0)
+        is_new_channel = (current_prior_count == 0)
+        is_above_p75 = (t.amount > p75_val)
 
         if is_new_channel and is_above_p75:
             ev = RuleEvidence(
@@ -49,7 +61,7 @@ def evaluate_r04_established_pattern_deviation(
                     f"amount {t.amount} > {p75_val} (P75 baseline)"
                 ),
                 baseline_value={
-                    "historical_channels": sorted(list(historical_channels)),
+                    "historical_channels": sorted([ch for ch, cnt in prior_counts.items() if cnt > 0]),
                     "p75_amount": p75_val,
                 },
                 message=(
@@ -58,6 +70,9 @@ def evaluate_r04_established_pattern_deviation(
                 ),
             )
             evidence.append(ev)
+
+        # Update channel count after processing this transaction
+        prior_counts[t.channel] = current_prior_count + 1
 
     triggered_ids = [e.transaction_id for e in evidence]
     return RuleResult(

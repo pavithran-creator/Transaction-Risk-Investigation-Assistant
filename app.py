@@ -364,7 +364,7 @@ if __name__ == "__main__":
     print(" Dashboard Frontend & Backend Server running at: http://localhost:8000")
     print(" Interactive API Documentation: http://localhost:8000/docs")
     print("=" * 70 + "\n")
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run("app:app", host="0.0.0.0", port=8000, reload=True)
 
 
 

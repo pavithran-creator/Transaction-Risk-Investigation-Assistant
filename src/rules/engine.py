@@ -19,12 +19,13 @@ from src.rules.r04_pattern_deviation import evaluate_r04_established_pattern_dev
 def evaluate_all_rules(
     dataset: Optional[TransactionDataset],
     baseline: Optional[CustomerBaseline] = None,
+    eval_only_recent: bool = True,
 ) -> RuleEvaluationResult:
     """
     Evaluate all 4 deterministic risk rules (R01-R04) against the provided dataset and baseline.
 
     Each rule runs independently. Non-triggered rules are retained in the result.
-    If baseline is not provided, it is automatically derived from the dataset.
+    If baseline is not provided, it is automatically derived from the dataset using historical split.
     """
     if not dataset or dataset.transaction_count == 0:
         return RuleEvaluationResult(
@@ -38,11 +39,20 @@ def evaluate_all_rules(
     if baseline is None:
         baseline = build_customer_baseline(dataset)
 
-    # Evaluate each rule independently
-    r01 = evaluate_r01_unusually_large_transfer(dataset.transactions, baseline)
-    r02 = evaluate_r02_burst_to_new_payee(dataset.transactions, baseline)
-    r03 = evaluate_r03_odd_hours_activity(dataset.transactions, baseline)
-    r04 = evaluate_r04_established_pattern_deviation(dataset.transactions, baseline)
+    sorted_txs = sorted(dataset.transactions, key=lambda t: (t.timestamp, t.transaction_id))
+
+    # Evaluate target transactions against baseline (recent evaluation set if historical split applied)
+    if eval_only_recent and len(sorted_txs) >= 5:
+        split_index = max(1, int(len(sorted_txs) * 0.8))
+        eval_txs = sorted_txs[split_index:]
+    else:
+        eval_txs = sorted_txs
+
+    # Evaluate each rule independently against target evaluation transactions
+    r01 = evaluate_r01_unusually_large_transfer(eval_txs, baseline)
+    r02 = evaluate_r02_burst_to_new_payee(eval_txs, baseline)
+    r03 = evaluate_r03_odd_hours_activity(eval_txs, baseline)
+    r04 = evaluate_r04_established_pattern_deviation(eval_txs, baseline)
 
     return RuleEvaluationResult(
         customer_id=cust_id,

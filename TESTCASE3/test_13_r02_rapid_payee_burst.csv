@@ -1,0 +1,12 @@
+transaction_id,customer_id,timestamp,description,payee,amount,channel
+T13-0001,CUST-1013,2026-05-01 10:00:00,Initial deposit,Main Bank,5000,BANK_TRANSFER
+T13-0002,CUST-1013,2026-05-02 11:30:00,Grocery shopping,SuperSave,1800,UPI
+T13-0003,CUST-1013,2026-05-05 14:20:00,Utility payment,PowerGrid,2100,UPI
+T13-0004,CUST-1013,2026-05-07 16:00:00,Fuel expense,PetroStation,1400,CARD
+T13-0005,CUST-1013,2026-05-10 10:15:00,Pharmacy item,MediCare,900,UPI
+T13-0006,CUST-1013,2026-05-12 12:00:00,Grocery shopping,SuperSave,1750,UPI
+T13-0007,CUST-1013,2026-05-14 15:30:00,Mobile plan,TelcoOne,799,UPI
+T13-0008,CUST-1013,2026-05-16 11:00:00,Burst payment 1 to new payee,Rapid Trading Corp,3500,UPI
+T13-0009,CUST-1013,2026-05-16 13:15:00,Burst payment 2 to new payee,Rapid Trading Corp,4200,UPI
+T13-0010,CUST-1013,2026-05-16 16:45:00,Burst payment 3 to new payee,Rapid Trading Corp,3800,UPI
+T13-0011,CUST-1013,2026-05-16 19:20:00,Burst payment 4 to new payee,Rapid Trading Corp,4000,UPI

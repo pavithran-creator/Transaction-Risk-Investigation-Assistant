@@ -1,0 +1,16 @@
+transaction_id,customer_id,timestamp,description,payee,amount,channel
+T15-0001,CUST-1015,2026-07-01 10:00:00,Baseline deposit,Main Bank,5000,UPI
+T15-0002,CUST-1015,2026-07-02 11:30:00,Grocery purchase,GreenBasket,1200,CARD
+T15-0003,CUST-1015,2026-07-03 14:15:00,Utility bill,Metro Utilities,1500,UPI
+T15-0004,CUST-1015,2026-07-04 16:40:00,Fuel expense,Sunrise Fuel,1100,CARD
+T15-0005,CUST-1015,2026-07-05 12:00:00,Grocery purchase,GreenBasket,1300,UPI
+T15-0006,CUST-1015,2026-07-06 15:45:00,Online purchase,ABC Electronics,1400,CARD
+T15-0007,CUST-1015,2026-07-07 10:10:00,Fuel expense,Sunrise Fuel,1250,UPI
+T15-0008,CUST-1015,2026-07-08 14:20:00,Restaurant payment,City Cafe,950,CARD
+T15-0009,CUST-1015,2026-07-09 11:30:00,Pharmacy purchase,Local Pharmacy,750,UPI
+T15-0010,CUST-1015,2026-07-10 16:00:00,Grocery purchase,GreenBasket,1350,CARD
+T15-0011,CUST-1015,2026-07-11 10:30:00,Utility bill,Metro Utilities,1450,UPI
+T15-0012,CUST-1015,2026-07-12 15:00:00,Fuel expense,Sunrise Fuel,1150,CARD
+T15-0013,CUST-1015,2026-07-15 02:15:00,Burst & odd-hours payment 1 to new payee,Shadow Enterprise,250000,IMPS
+T15-0014,CUST-1015,2026-07-15 03:10:00,Burst & odd-hours payment 2 to new payee,Shadow Enterprise,180000,IMPS
+T15-0015,CUST-1015,2026-07-15 04:20:00,Burst & odd-hours payment 3 to new payee,Shadow Enterprise,210000,IMPS

@@ -1,0 +1,42 @@
+transaction_id,customer_id,timestamp,description,payee,amount,channel
+T05-0001,CUST-1005,2026-02-03 12:25:46,Salary credit,Nova Telecom,1599.12,UPI
+T05-0002,CUST-1005,2026-02-07 15:07:52,Insurance payment,MetroMart,1185.87,CARD
+T05-0003,CUST-1005,2026-02-09 16:49:10,Grocery purchase,GreenBasket,1457.65,CARD
+T05-0004,CUST-1005,2026-02-12 10:36:39,Transfer to savings,City Utilities,1353.09,UPI
+T05-0005,CUST-1005,2026-02-17 11:22:18,Mobile recharge,GreenBasket,1352.76,CARD
+T05-0006,CUST-1005,2026-02-20 16:48:51,Online purchase,GreenBasket,1398.58,UPI
+T05-0007,CUST-1005,2026-02-21 09:58:30,Grocery purchase,City Utilities,967.22,UPI
+T05-0008,CUST-1005,2026-02-26 20:39:44,Electricity bill,GreenBasket,1032.89,UPI
+T05-0009,CUST-1005,2026-03-07 18:25:39,Restaurant payment,GreenBasket,1386.05,CARD
+T05-0010,CUST-1005,2026-03-09 17:10:24,Monthly rent,City Utilities,1492.07,UPI
+T05-0011,CUST-1005,2026-03-12 12:46:52,Grocery purchase,GreenBasket,1729.92,UPI
+T05-0012,CUST-1005,2026-03-18 19:53:20,Insurance payment,MetroMart,915.48,CARD
+T05-0013,CUST-1005,2026-03-19 17:54:40,Electricity bill,City Utilities,952.38,CARD
+T05-0014,CUST-1005,2026-03-20 15:42:23,Mobile recharge,Nova Telecom,1490.9,CARD
+T05-0015,CUST-1005,2026-03-23 11:01:00,Restaurant payment,Apex Rentals,981.29,CARD
+T05-0016,CUST-1005,2026-03-25 11:51:30,Monthly rent,Nova Telecom,1370.67,UPI
+T05-0017,CUST-1005,2026-03-26 11:22:27,Monthly rent,City Utilities,1414.67,UPI
+T05-0018,CUST-1005,2026-04-10 09:40:08,Transfer to savings,MetroMart,963.57,CARD
+T05-0019,CUST-1005,2026-04-12 20:32:05,Mobile recharge,MetroMart,1644.55,UPI
+T05-0020,CUST-1005,2026-04-14 09:54:04,Transfer to savings,Apex Rentals,1032.28,UPI
+T05-0021,CUST-1005,2026-04-21 12:08:56,Online purchase,Nova Telecom,1943.15,UPI
+T05-0022,CUST-1005,2026-04-23 19:50:46,Monthly rent,GreenBasket,1120.31,CARD
+T05-0023,CUST-1005,2026-04-24 18:48:16,ATM withdrawal,GreenBasket,1491.52,CARD
+T05-0024,CUST-1005,2026-04-25 11:16:32,Salary credit,Nova Telecom,1154.38,CARD
+T05-0025,CUST-1005,2026-04-26 18:32:15,ATM withdrawal,City Utilities,1485.14,UPI
+T05-0026,CUST-1005,2026-04-27 19:59:17,Insurance payment,City Utilities,1343.63,UPI
+T05-0027,CUST-1005,2026-05-01 13:07:49,Grocery purchase,Apex Rentals,1114.41,CARD
+T05-0028,CUST-1005,2026-05-07 17:33:37,Online purchase,MetroMart,1085.93,CARD
+T05-0029,CUST-1005,2026-05-10 20:51:23,Insurance payment,City Utilities,1693.03,CARD
+T05-0030,CUST-1005,2026-05-13 14:48:05,Salary credit,Nova Telecom,1276.51,UPI
+T05-0031,CUST-1005,2026-05-16 18:47:03,Mobile recharge,City Utilities,1290.17,CARD
+T05-0032,CUST-1005,2026-05-17 20:00:47,Salary credit,MetroMart,1728.28,UPI
+T05-0033,CUST-1005,2026-05-23 13:39:40,Insurance payment,Nova Telecom,664.36,UPI
+T05-0034,CUST-1005,2026-05-24 16:14:39,Grocery purchase,MetroMart,1249.26,UPI
+T05-0035,CUST-1005,2026-06-04 09:36:22,Monthly rent,City Utilities,933.1,CARD
+T05-0036,CUST-1005,2026-06-07 18:19:37,Salary credit,GreenBasket,1246.4,CARD
+T05-0037,CUST-1005,2026-06-15 18:53:30,Utility payment,GreenBasket,1837.38,UPI
+T05-0038,CUST-1005,2026-06-16 16:06:04,Electricity bill,GreenBasket,1347.77,CARD
+T05-0039,CUST-1005,2026-06-19 15:51:16,Grocery purchase,MetroMart,1063.53,CARD
+T05-0040,CUST-1005,2026-06-20 18:41:37,School fee,Nova Telecom,995.35,CARD
+T05-0041,CUST-1005,2026-06-22 13:00:00,Online purchase,Nova Telecom,1709.57,BANK_TRANSFER

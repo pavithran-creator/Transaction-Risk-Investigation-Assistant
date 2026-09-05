@@ -1,0 +1,10 @@
+transaction_id,customer_id,timestamp,description,payee,amount,channel
+T14-0001,CUST-1014,2026-06-01 10:00:00,Normal daytime purchase,MetroMart,1200,UPI
+T14-0002,CUST-1014,2026-06-03 14:30:00,Electricity payment,City Utilities,2100,UPI
+T14-0003,CUST-1014,2026-06-05 16:45:00,Fuel expense,PetroStation,1500,CARD
+T14-0004,CUST-1014,2026-06-07 11:20:00,Pharmacy item,MediCare,800,UPI
+T14-0005,CUST-1014,2026-06-09 15:10:00,Grocery purchase,MetroMart,1350,UPI
+T14-0006,CUST-1014,2026-06-11 12:00:00,Mobile plan,TelcoOne,699,UPI
+T14-0007,CUST-1014,2026-06-13 17:30:00,Restaurant dinner,City Cafe,1100,CARD
+T14-0008,CUST-1014,2026-06-15 01:15:00,Late night odd-hours transaction,NightOwl Ltd,2500,UPI
+T14-0009,CUST-1014,2026-06-15 03:40:00,Early morning odd-hours transaction,NightOwl Ltd,1800,UPI

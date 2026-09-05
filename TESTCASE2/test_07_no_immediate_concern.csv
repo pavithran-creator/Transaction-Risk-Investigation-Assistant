@@ -1,0 +1,56 @@
+transaction_id,customer_id,timestamp,description,payee,amount,channel
+T07-0001,CUST-1007,2026-01-18 21:35:41,Restaurant payment,GreenBasket,2161.71,IMPS
+T07-0002,CUST-1007,2026-01-19 21:54:14,Transfer to savings,City Utilities,1393.03,ATM
+T07-0003,CUST-1007,2026-01-29 19:11:30,Transfer to savings,MetroMart,1804.0,IMPS
+T07-0004,CUST-1007,2026-01-30 14:15:41,ATM withdrawal,City Utilities,1201.35,UPI
+T07-0005,CUST-1007,2026-02-01 19:57:23,Online purchase,GreenBasket,1651.51,ATM
+T07-0006,CUST-1007,2026-02-03 09:05:52,ATM withdrawal,Apex Rentals,1644.36,IMPS
+T07-0007,CUST-1007,2026-02-09 19:37:00,Grocery purchase,BlueWave Services,1395.73,NEFT
+T07-0008,CUST-1007,2026-02-11 10:41:18,School fee,City Utilities,1769.43,NEFT
+T07-0009,CUST-1007,2026-02-15 11:49:28,Utility payment,City Utilities,1725.58,NEFT
+T07-0010,CUST-1007,2026-02-17 15:50:34,School fee,GreenBasket,2003.27,UPI
+T07-0011,CUST-1007,2026-02-21 19:57:57,Electricity bill,Apex Rentals,1271.21,IMPS
+T07-0012,CUST-1007,2026-02-26 12:31:44,Mobile recharge,GreenBasket,2239.75,UPI
+T07-0013,CUST-1007,2026-03-03 17:07:16,Salary credit,Nova Telecom,1944.49,NEFT
+T07-0014,CUST-1007,2026-03-05 16:31:35,Restaurant payment,MetroMart,1392.28,ATM
+T07-0015,CUST-1007,2026-03-08 12:31:10,School fee,Apex Rentals,1643.57,UPI
+T07-0016,CUST-1007,2026-03-09 11:53:20,Transfer to savings,Nova Telecom,1080.66,ATM
+T07-0017,CUST-1007,2026-03-10 14:27:26,Monthly rent,BlueWave Services,1384.62,NEFT
+T07-0018,CUST-1007,2026-03-12 19:23:40,Grocery purchase,BlueWave Services,1715.48,IMPS
+T07-0019,CUST-1007,2026-03-13 21:06:32,Restaurant payment,Nova Telecom,1615.0,NEFT
+T07-0020,CUST-1007,2026-03-15 09:13:45,Electricity bill,Nova Telecom,1718.26,IMPS
+T07-0021,CUST-1007,2026-03-20 14:30:49,Mobile recharge,Apex Rentals,1721.12,NEFT
+T07-0022,CUST-1007,2026-03-23 13:27:21,Online purchase,Nova Telecom,929.1,IMPS
+T07-0023,CUST-1007,2026-03-26 14:52:31,ATM withdrawal,Nova Telecom,1363.08,CARD
+T07-0024,CUST-1007,2026-04-02 13:55:32,Salary credit,City Utilities,1219.98,IMPS
+T07-0025,CUST-1007,2026-04-12 12:20:45,Utility payment,City Utilities,1044.13,CARD
+T07-0026,CUST-1007,2026-04-14 19:05:50,Insurance payment,MetroMart,1464.82,CARD
+T07-0027,CUST-1007,2026-04-15 18:03:25,Monthly rent,City Utilities,820.34,UPI
+T07-0028,CUST-1007,2026-04-16 09:12:52,School fee,Nova Telecom,1613.42,CARD
+T07-0029,CUST-1007,2026-04-19 17:39:24,Utility payment,Apex Rentals,1466.83,CARD
+T07-0030,CUST-1007,2026-04-22 19:05:13,Electricity bill,MetroMart,1244.38,NEFT
+T07-0031,CUST-1007,2026-04-25 10:42:11,Insurance payment,MetroMart,1203.75,UPI
+T07-0032,CUST-1007,2026-04-27 19:00:23,Online purchase,GreenBasket,1328.5,IMPS
+T07-0033,CUST-1007,2026-04-30 11:26:02,Grocery purchase,City Utilities,1488.34,ATM
+T07-0034,CUST-1007,2026-05-02 18:41:37,Restaurant payment,MetroMart,1501.83,UPI
+T07-0035,CUST-1007,2026-05-11 21:51:26,Transfer to savings,Apex Rentals,1555.67,ATM
+T07-0036,CUST-1007,2026-05-13 16:04:00,Insurance payment,BlueWave Services,603.32,NEFT
+T07-0037,CUST-1007,2026-05-15 16:49:26,Monthly rent,Apex Rentals,933.02,UPI
+T07-0038,CUST-1007,2026-05-16 19:30:13,Electricity bill,GreenBasket,1637.03,UPI
+T07-0039,CUST-1007,2026-05-24 10:13:55,Utility payment,MetroMart,1603.63,ATM
+T07-0040,CUST-1007,2026-05-26 09:17:46,Salary credit,Apex Rentals,1002.28,UPI
+T07-0041,CUST-1007,2026-05-27 14:49:47,Transfer to savings,BlueWave Services,1790.99,NEFT
+T07-0042,CUST-1007,2026-05-28 20:48:05,Electricity bill,City Utilities,1182.61,IMPS
+T07-0043,CUST-1007,2026-05-29 09:45:02,Grocery purchase,MetroMart,1442.31,UPI
+T07-0044,CUST-1007,2026-06-02 19:43:52,Monthly rent,Apex Rentals,1347.93,CARD
+T07-0045,CUST-1007,2026-06-07 11:55:53,School fee,Nova Telecom,1811.35,UPI
+T07-0046,CUST-1007,2026-06-10 14:23:36,Restaurant payment,BlueWave Services,1374.8,UPI
+T07-0047,CUST-1007,2026-06-11 14:41:10,Insurance payment,BlueWave Services,1643.25,ATM
+T07-0048,CUST-1007,2026-06-12 15:49:50,Online purchase,Nova Telecom,1706.09,IMPS
+T07-0049,CUST-1007,2026-06-16 13:03:39,Transfer to savings,BlueWave Services,1120.05,CARD
+T07-0050,CUST-1007,2026-06-21 14:55:38,Grocery purchase,BlueWave Services,1851.85,IMPS
+T07-0051,CUST-1007,2026-06-25 18:27:56,Insurance payment,GreenBasket,1150.54,ATM
+T07-0052,CUST-1007,2026-06-27 19:24:38,Restaurant payment,GreenBasket,1595.41,IMPS
+T07-0053,CUST-1007,2026-06-29 13:27:10,Grocery purchase,Apex Rentals,1621.59,IMPS
+T07-0054,CUST-1007,2026-07-05 11:51:56,Utility payment,Apex Rentals,1489.27,CARD
+T07-0055,CUST-1007,2026-07-09 19:49:58,ATM withdrawal,Nova Telecom,2333.43,CARD

@@ -1,0 +1,12 @@
+transaction_id,customer_id,timestamp,description,payee,amount,channel
+T11-0001,CUST-1011,2026-03-01 10:00:00,Grocery purchase,GreenMart,1200,UPI
+T11-0002,CUST-1011,2026-03-03 11:15:00,Utility bill,Metro Utilities,1500,CARD
+T11-0003,CUST-1011,2026-03-05 14:20:00,Fuel expense,Sunrise Fuel,1100,UPI
+T11-0004,CUST-1011,2026-03-07 16:30:00,Mobile recharge,Connect Mobile,800,CARD
+T11-0005,CUST-1011,2026-03-09 12:00:00,Grocery purchase,GreenMart,1300,UPI
+T11-0006,CUST-1011,2026-03-11 15:45:00,Online purchase,ABC Electronics,1400,CARD
+T11-0007,CUST-1011,2026-03-13 10:10:00,Fuel expense,Sunrise Fuel,1250,UPI
+T11-0008,CUST-1011,2026-03-15 14:00:00,Restaurant payment,City Cafe,950,CARD
+T11-0009,CUST-1011,2026-03-17 11:30:00,Pharmacy purchase,Local Pharmacy,750,UPI
+T11-0010,CUST-1011,2026-03-19 16:00:00,Grocery purchase,GreenMart,1350,CARD
+T11-0011,CUST-1011,2026-03-21 12:00:00,Unobserved channel transfer,Nova Tech,15000,IMPS

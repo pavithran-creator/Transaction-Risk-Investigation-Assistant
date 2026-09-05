@@ -45,6 +45,27 @@ def test_r01_amount_above_p95_triggers():
     assert "250000.0 > 35000.0" in ev.comparison
 
 
+def test_r01_custom_multiplier():
+    """R01 should filter out transactions slightly above P95 when multiplier > 1.0 is supplied."""
+    dt = datetime(2026, 1, 15, 10, 0, 0)
+    # Amount 1734.29 is slightly above P95 (1733.74), but below 1.2 * P95 (2080.49)
+    t1 = Transaction(transaction_id="T1", customer_id="C1", timestamp=dt, description="D", payee="P", amount=1734.29, channel="CARD")
+
+    baseline = CustomerBaseline(
+        customer_id="C1",
+        transaction_count=20,
+        amount_statistics=AmountStatistics(min=100.0, max=1734.29, mean=500.0, median=400.0, p95=1733.74),
+    )
+
+    # With multiplier 1.0, 1734.29 > 1733.74 triggers
+    res_default = evaluate_r01_unusually_large_transfer([t1], baseline, multiplier=1.0)
+    assert res_default.triggered is True
+
+    # With multiplier 1.2, threshold is 2080.49; 1734.29 does not trigger
+    res_mult = evaluate_r01_unusually_large_transfer([t1], baseline, multiplier=1.2)
+    assert res_mult.triggered is False
+
+
 def test_r01_missing_p95_does_not_invent_threshold():
     dt = datetime(2026, 1, 15, 10, 0, 0)
     t1 = Transaction(transaction_id="T1", customer_id="C1", timestamp=dt, description="D", payee="P", amount=500000.0, channel="NEFT")

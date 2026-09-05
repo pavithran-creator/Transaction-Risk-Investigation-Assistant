@@ -1,0 +1,12 @@
+transaction_id,customer_id,timestamp,description,payee,amount,channel
+T12-0001,CUST-1012,2026-04-01 09:30:00,Weekly grocery,FreshMart,1500,UPI
+T12-0002,CUST-1012,2026-04-03 11:00:00,Electricity bill,City Power,2200,UPI
+T12-0003,CUST-1012,2026-04-06 14:15:00,Fuel expense,PetroStation,1800,CARD
+T12-0004,CUST-1012,2026-04-08 16:40:00,Dining out,FoodPlaza,1200,UPI
+T12-0005,CUST-1012,2026-04-10 10:20:00,Mobile bill,TelcoOne,650,UPI
+T12-0006,CUST-1012,2026-04-12 15:10:00,Weekly grocery,FreshMart,1600,UPI
+T12-0007,CUST-1012,2026-04-15 12:00:00,Pharmacy purchase,HealthPlus,850,CARD
+T12-0008,CUST-1012,2026-04-18 17:30:00,Online store,ShopCart,3400,CARD
+T12-0009,CUST-1012,2026-04-20 11:45:00,Coffee shop,BeanStation,450,UPI
+T12-0010,CUST-1012,2026-04-22 14:00:00,Weekly grocery,FreshMart,1550,UPI
+T12-0011,CUST-1012,2026-04-25 11:00:00,Unusually massive wire transfer,Global Ventures,450000,NEFT

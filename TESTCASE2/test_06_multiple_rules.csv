@@ -1,0 +1,51 @@
+transaction_id,customer_id,timestamp,description,payee,amount,channel
+T06-0001,CUST-1006,2026-02-01 13:14:41,Monthly rent,MetroMart,1101.86,IMPS
+T06-0002,CUST-1006,2026-02-04 20:03:17,Electricity bill,Apex Rentals,1900.42,ATM
+T06-0003,CUST-1006,2026-02-07 19:50:58,Online purchase,Apex Rentals,1172.67,NEFT
+T06-0004,CUST-1006,2026-02-11 10:56:32,Utility payment,MetroMart,2171.29,IMPS
+T06-0005,CUST-1006,2026-02-12 12:53:47,Utility payment,GreenBasket,1392.47,ATM
+T06-0006,CUST-1006,2026-02-14 14:38:15,Electricity bill,Nova Telecom,1088.68,CARD
+T06-0007,CUST-1006,2026-02-15 16:30:53,Transfer to savings,Apex Rentals,1481.08,NEFT
+T06-0008,CUST-1006,2026-02-16 18:56:19,Insurance payment,GreenBasket,1403.25,CARD
+T06-0009,CUST-1006,2026-02-17 18:04:36,Utility payment,GreenBasket,1566.87,CARD
+T06-0010,CUST-1006,2026-02-23 11:22:09,Grocery purchase,MetroMart,1435.01,UPI
+T06-0011,CUST-1006,2026-02-27 11:44:41,Transfer to savings,MetroMart,1498.55,CARD
+T06-0012,CUST-1006,2026-03-01 14:12:52,Electricity bill,Apex Rentals,1444.74,UPI
+T06-0013,CUST-1006,2026-03-09 20:24:06,Salary credit,GreenBasket,1426.65,UPI
+T06-0014,CUST-1006,2026-03-11 19:40:18,Monthly rent,Nova Telecom,1487.92,NEFT
+T06-0015,CUST-1006,2026-03-13 10:50:48,Online purchase,GreenBasket,1245.33,UPI
+T06-0016,CUST-1006,2026-03-15 14:16:59,Grocery purchase,City Utilities,1733.36,IMPS
+T06-0017,CUST-1006,2026-03-17 14:49:38,Restaurant payment,Apex Rentals,1688.9,UPI
+T06-0018,CUST-1006,2026-03-20 15:01:27,Monthly rent,Apex Rentals,1009.51,IMPS
+T06-0019,CUST-1006,2026-03-21 16:45:03,School fee,Apex Rentals,1545.29,UPI
+T06-0020,CUST-1006,2026-03-23 18:52:18,Insurance payment,GreenBasket,2081.57,UPI
+T06-0021,CUST-1006,2026-03-24 17:12:18,Grocery purchase,MetroMart,1309.49,NEFT
+T06-0022,CUST-1006,2026-03-28 16:37:22,Online purchase,Apex Rentals,1528.26,CARD
+T06-0023,CUST-1006,2026-03-30 11:18:52,Transfer to savings,GreenBasket,1424.4,UPI
+T06-0024,CUST-1006,2026-04-01 16:50:44,Monthly rent,Apex Rentals,1609.32,IMPS
+T06-0025,CUST-1006,2026-04-02 14:06:25,Transfer to savings,Nova Telecom,2028.19,UPI
+T06-0026,CUST-1006,2026-04-03 14:13:19,Insurance payment,City Utilities,1777.79,CARD
+T06-0027,CUST-1006,2026-04-05 17:10:24,Restaurant payment,GreenBasket,1728.39,CARD
+T06-0028,CUST-1006,2026-04-10 19:02:22,ATM withdrawal,Apex Rentals,1736.24,CARD
+T06-0029,CUST-1006,2026-04-21 11:55:53,Electricity bill,Nova Telecom,1108.12,ATM
+T06-0030,CUST-1006,2026-04-22 16:44:49,School fee,City Utilities,1297.53,NEFT
+T06-0031,CUST-1006,2026-04-25 11:21:29,Mobile recharge,GreenBasket,1506.42,CARD
+T06-0032,CUST-1006,2026-05-03 11:46:09,Transfer to savings,GreenBasket,1676.75,IMPS
+T06-0033,CUST-1006,2026-05-04 18:33:22,Salary credit,GreenBasket,1293.18,UPI
+T06-0034,CUST-1006,2026-05-06 11:42:06,Insurance payment,GreenBasket,1599.99,NEFT
+T06-0035,CUST-1006,2026-05-07 11:50:19,Insurance payment,City Utilities,1374.89,UPI
+T06-0036,CUST-1006,2026-05-12 13:13:56,Restaurant payment,Nova Telecom,1566.5,UPI
+T06-0037,CUST-1006,2026-05-15 09:25:54,Transfer to savings,Nova Telecom,1569.58,IMPS
+T06-0038,CUST-1006,2026-05-17 16:01:09,School fee,City Utilities,2369.91,ATM
+T06-0039,CUST-1006,2026-05-18 09:47:15,Transfer to savings,Nova Telecom,879.72,ATM
+T06-0040,CUST-1006,2026-05-20 12:42:46,Salary credit,Apex Rentals,1139.1,NEFT
+T06-0041,CUST-1006,2026-05-25 19:07:29,ATM withdrawal,Nova Telecom,1366.52,ATM
+T06-0042,CUST-1006,2026-06-10 12:50:25,Online purchase,GreenBasket,1942.57,ATM
+T06-0043,CUST-1006,2026-06-17 16:29:01,Insurance payment,Apex Rentals,888.5,NEFT
+T06-0044,CUST-1006,2026-06-24 19:20:49,Insurance payment,MetroMart,1341.08,ATM
+T06-0045,CUST-1006,2026-06-28 10:02:16,Salary credit,Apex Rentals,1724.5,NEFT
+T06-0046,CUST-1006,2026-07-03 15:00:00,Online purchase,MetroMart,8283.58,IMPS
+T06-0047,CUST-1006,2026-07-03 18:00:00,Transfer to savings,BlueWave Services,900.0,UPI
+T06-0048,CUST-1006,2026-07-03 21:00:00,Transfer to savings,BlueWave Services,950.0,UPI
+T06-0049,CUST-1006,2026-07-04 00:00:00,Transfer to savings,BlueWave Services,1000.0,UPI
+T06-0050,CUST-1006,2026-07-04 02:15:00,ATM withdrawal,MetroMart,1350.0,IMPS

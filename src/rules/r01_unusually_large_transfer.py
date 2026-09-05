@@ -9,7 +9,6 @@ from typing import List
 from src.models.baseline import CustomerBaseline
 from src.models.rules import RuleEvidence, RuleResult
 from src.models.transaction import Transaction
-from src.rules.config import R01_AMOUNT_PERCENTILE_KEY
 
 
 def evaluate_r01_unusually_large_transfer(

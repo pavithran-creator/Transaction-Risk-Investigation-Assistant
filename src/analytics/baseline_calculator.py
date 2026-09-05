@@ -191,42 +191,54 @@ def calculate_frequency_statistics(transactions: List[Transaction]) -> Optional[
     )
 
 
-def build_customer_baseline(dataset: Optional[TransactionDataset]) -> Optional[CustomerBaseline]:
+def build_customer_baseline(
+    dataset: Optional[TransactionDataset],
+    historical_split: bool = True,
+    historical_ratio: float = 0.8,
+) -> Optional[CustomerBaseline]:
     """
-    Build a complete CustomerBaseline profile from a loaded TransactionDataset.
+    Build a CustomerBaseline profile from a loaded TransactionDataset.
 
-    Consumes the Phase 3 TransactionDataset directly without re-parsing CSV.
-    Returns None if dataset is empty or invalid.
+    If historical_split is True (default) and transaction count >= 5, calculates baseline statistics
+    using earlier/historical transactions (first 80% chronologically) so that baseline metrics
+    reflect prior established customer behavior rather than self-referencing the full dataset.
     """
     if not dataset or dataset.transaction_count == 0:
         return None
 
     cust_id = dataset.customer_id or (dataset.customer_ids[0] if dataset.customer_ids else "UNKNOWN")
-    transactions = dataset.transactions
+    transactions = sorted(dataset.transactions, key=lambda t: (t.timestamp, t.transaction_id))
+
+    # Determine historical split
+    if historical_split and len(transactions) >= 5:
+        split_index = max(1, int(len(transactions) * historical_ratio))
+        baseline_txs = transactions[:split_index]
+    else:
+        baseline_txs = transactions
 
     # Amounts
-    amounts = [t.amount for t in transactions]
+    amounts = [t.amount for t in baseline_txs]
     amount_stats = calculate_amount_statistics(amounts)
 
     # Channels
-    channel_usage = calculate_channel_usage(transactions)
+    channel_usage = calculate_channel_usage(baseline_txs)
 
     # Payees
-    payee_usage = calculate_payee_usage(transactions)
+    payee_usage = calculate_payee_usage(baseline_txs)
 
     # Temporal (Hourly & Weekday)
-    hourly_act = calculate_hourly_activity(transactions)
-    weekday_act = calculate_weekday_activity(transactions)
+    hourly_act = calculate_hourly_activity(baseline_txs)
+    weekday_act = calculate_weekday_activity(baseline_txs)
 
     # Frequency
-    freq_stats = calculate_frequency_statistics(transactions)
+    freq_stats = calculate_frequency_statistics(baseline_txs)
 
     # Date range
     date_range_model = None
-    if dataset.date_range and dataset.date_range.earliest and dataset.date_range.latest:
+    if baseline_txs:
         date_range_model = DateRangeModel(
-            start=dataset.date_range.earliest,
-            end=dataset.date_range.latest,
+            start=baseline_txs[0].timestamp.isoformat(),
+            end=baseline_txs[-1].timestamp.isoformat(),
         )
 
     return CustomerBaseline(
