@@ -658,5 +658,6 @@ Banking Transaction Risk Investigation Assistant/
 5. **No Discriminatory Attributes:** Analysis is performed strictly on financial transaction attributes (`amount`, `timestamp`, `channel`, `payee`). No demographic, socio-economic, or protected traits are utilized.
 
 ---
+demo video:https://vimeo.com/1224249453?share=copy&fl=sv&fe=ci
 
 *PS06 – Banking Transaction Risk Investigation Assistant — Built for modern financial compliance and transaction risk investigation.*
