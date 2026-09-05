@@ -327,7 +327,7 @@ function CaseMetadataBar({ customer_id, attention, onReset }) {
           <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem', fontWeight: 600 }}>CASE REF:</span>
           <span className="case-ref">NXS-PS06-LIVE</span>
           <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem', fontWeight: 600, marginLeft: '0.5rem' }}>CUSTOMER:</span>
-          <strong style={{ color: 'white', fontSize: '0.9rem' }}>{customer_id || '—'}</strong>
+          <strong style={{ color: 'var(--text-primary)', fontSize: '0.9rem' }}>{customer_id || '—'}</strong>
           <span className={`attention-badge ${badgeClass}`}>{attLabel}</span>
         </div>
         <div className="action-buttons">
@@ -604,6 +604,17 @@ function RulesSection({ rulesData, assessment, onInspectTx, highlightedRuleId })
   else if (attLevel === 'NO_IMMEDIATE_CONCERN') bannerClass = 'none';
 
   const rules = rulesData?.rules || [];
+  const [expandedRules, setExpandedRules] = useState({});
+
+  useEffect(() => {
+    if (highlightedRuleId) {
+      setExpandedRules(prev => ({ ...prev, [highlightedRuleId]: true }));
+    }
+  }, [highlightedRuleId]);
+
+  const toggleRuleExpand = (ruleId) => {
+    setExpandedRules(prev => ({ ...prev, [ruleId]: !prev[ruleId] }));
+  };
 
   return (
     <section className="step-card">
@@ -627,11 +638,13 @@ function RulesSection({ rulesData, assessment, onInspectTx, highlightedRuleId })
       </div>
 
       {/* Rule Cards Grid */}
-      <div style={{ fontSize: '0.9rem', fontWeight: 700, marginBottom: '0.75rem' }}>Deterministic Risk Rule Results (R01–R04)</div>
+      <div style={{ fontSize: '0.9rem', fontWeight: 700, marginBottom: '0.75rem' }}>Deterministic Risk Rule Evaluation</div>
       <div className="rules-grid">
         {rules.map(r => {
           const triggered = r.triggered;
           const isHighlighted = highlightedRuleId === r.rule_id;
+          const isExpanded = !!expandedRules[r.rule_id];
+
           return (
             <div 
               key={r.rule_id} 
@@ -640,36 +653,53 @@ function RulesSection({ rulesData, assessment, onInspectTx, highlightedRuleId })
               style={isHighlighted ? { border: '2px solid #3b82f6', transform: 'scale(1.02)' } : {}}
             >
               <div className="rule-card-header">
-                <span className="rule-code">{r.rule_id}</span>
-                <span className={`attention-badge ${triggered ? 'badge-high' : 'badge-none'}`} style={{ fontSize: '0.7rem', padding: '0.15rem 0.4rem' }}>
-                  {triggered ? 'TRIGGERED' : 'NOT TRIGGERED'}
+                <div className="rule-name">{r.name}</div>
+                <span className={`rule-status-badge ${triggered ? 'rule-status-fail' : 'rule-status-pass'}`}>
+                  <span className="rule-status-icon">{triggered ? '✗' : '✓'}</span>
+                  <span>{triggered ? 'Rule Broken' : 'Passed'}</span>
                 </span>
               </div>
-              <div className="rule-name">{r.name}</div>
-              
-              {triggered && r.evidence && r.evidence.length > 0 ? (
-                <div className="rule-evidence-box">
-                  {r.evidence.map((ev, idx) => {
-                    const txIds = ev.affected_transaction_ids || (ev.transaction_id ? [ev.transaction_id] : []);
-                    return (
-                      <div key={idx} style={{ marginBottom: '0.35rem' }}>
-                        • {ev.message || ev.description}
-                        {txIds.map(tid => (
-                          <button 
-                            key={tid} 
-                            className="btn btn-outline" 
-                            onClick={() => onInspectTx(tid)}
-                            style={{ padding: '0.1rem 0.35rem', fontSize: '0.75rem', marginLeft: '0.3rem' }}
-                          >
-                            🔍 {tid}
-                          </button>
-                        ))}
-                      </div>
-                    );
-                  })}
+
+              <div>
+                <button 
+                  type="button"
+                  className="rule-toggle-btn"
+                  onClick={() => toggleRuleExpand(r.rule_id)}
+                >
+                  <span>{isExpanded ? 'Hide Details' : 'View Details'}</span>
+                  <span className={`rule-arrow-icon ${isExpanded ? 'open' : ''}`}>▼</span>
+                </button>
+              </div>
+
+              {isExpanded && (
+                <div className="rule-details-container">
+                  {triggered && r.evidence && r.evidence.length > 0 ? (
+                    <div className="rule-evidence-box">
+                      {r.evidence.map((ev, idx) => {
+                        const txIds = ev.affected_transaction_ids || (ev.transaction_id ? [ev.transaction_id] : []);
+                        return (
+                          <div key={idx} style={{ marginBottom: '0.35rem' }}>
+                            • {ev.message || ev.description}
+                            {txIds.map(tid => (
+                              <button 
+                                key={tid} 
+                                className="btn btn-outline" 
+                                onClick={() => onInspectTx(tid)}
+                                style={{ padding: '0.1rem 0.35rem', fontSize: '0.75rem', marginLeft: '0.3rem' }}
+                              >
+                                🔍 {tid}
+                              </button>
+                            ))}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: '0.5rem' }}>
+                      No trigger conditions met. Transaction behavior conforms to standard customer baseline.
+                    </div>
+                  )}
                 </div>
-              ) : (
-                <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>No trigger conditions met.</div>
               )}
             </div>
           );
@@ -799,7 +829,7 @@ function ReportSection({ report, invData, onInspectTx, onJumpRule }) {
               <div>
                 <h4 style={{ fontSize: '0.85rem', color: '#a78bfa', marginBottom: '0.4rem' }}>What Investigator Should Look At First (Priority)</h4>
                 <div className="directive-box">
-                  <strong style={{ fontSize: '0.9rem', color: 'white' }}>{report.investigator_priority || 'Review triggered evidence.'}</strong>
+                  <strong style={{ fontSize: '0.9rem', color: '#92400e' }}>{report.investigator_priority || 'Review triggered evidence.'}</strong>
                 </div>
               </div>
             </div>
@@ -849,7 +879,7 @@ function TransactionModal({ tx, baseline, report, onClose, onJumpRule }) {
     <div className="modal-overlay active" onClick={(e) => { if (e.target.className.includes('modal-overlay')) onClose(); }}>
       <div className="modal-container">
         <div className="modal-header">
-          <h3 style={{ fontSize: '1.1rem', color: 'white' }}>Inspect Transaction: {tx.transaction_id}</h3>
+          <h3 style={{ fontSize: '1.1rem', color: 'var(--text-primary)' }}>Inspect Transaction: {tx.transaction_id}</h3>
           <button className="close-btn" onClick={onClose}>&times;</button>
         </div>
         <div style={{ padding: '1.25rem' }}>
