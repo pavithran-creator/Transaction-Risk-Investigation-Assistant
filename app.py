@@ -9,6 +9,7 @@ from src.analytics.investigation_service import generate_investigation_explanati
 from src.analytics.state import clear_current_dataset, get_current_dataset, set_current_dataset
 from src.analytics.transaction_loader import load_dataset_from_csv_bytes
 from src.models.transaction import MAX_UPLOAD_SIZE_BYTES, error_response
+from src.reports.report_service import generate_investigation_report
 from src.rules.engine import evaluate_all_rules
 
 
@@ -285,6 +286,46 @@ def get_investigation():
                 "message": "An unexpected error occurred while generating the investigation explanation.",
                 "customer_id": None,
                 "explanation": None,
+            },
+        )
+
+
+@app.get("/api/report")
+def get_report():
+    """
+    Generate complete, structured Investigation Report for the loaded transaction history.
+
+    Combines baseline metrics, deterministic risk rules (R01-R04), attention level,
+    and grounded Gemini investigation explanation into a traceable report.
+    """
+    try:
+        dataset = get_current_dataset()
+        if not dataset or dataset.transaction_count == 0:
+            return JSONResponse(
+                status_code=200,
+                content={
+                    "valid": False,
+                    "message": "No transaction dataset is loaded. Upload a valid transaction CSV first.",
+                },
+            )
+
+        report = generate_investigation_report(dataset)
+        return JSONResponse(
+            status_code=200,
+            content={
+                "status": "completed",
+                "customer_id": report.customer_id,
+                "report": report.model_dump(mode="json"),
+            },
+        )
+    except Exception:
+        return JSONResponse(
+            status_code=500,
+            content={
+                "status": "error",
+                "message": "An unexpected error occurred while generating the investigation report.",
+                "customer_id": None,
+                "report": None,
             },
         )
 
