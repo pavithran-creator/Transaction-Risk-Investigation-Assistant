@@ -347,6 +347,23 @@ def get_report():
 
 
 if __name__ == "__main__":
+    import threading
+    import webbrowser
+
+    def open_browser():
+        import time
+        time.sleep(1.2)
+        try:
+            webbrowser.open("http://localhost:8000")
+        except Exception:
+            pass
+
+    threading.Thread(target=open_browser, daemon=True).start()
+    print("\n" + "=" * 70)
+    print(" 🚀 PS06 Banking Transaction Risk Investigation Assistant")
+    print(" 🌐 Dashboard Frontend & Backend Server running at: http://localhost:8000")
+    print(" 📑 Interactive API Documentation: http://localhost:8000/docs")
+    print("=" * 70 + "\n")
     uvicorn.run(app, host="0.0.0.0", port=8000)
 
 
