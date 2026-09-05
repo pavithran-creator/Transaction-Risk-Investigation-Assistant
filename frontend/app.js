@@ -90,6 +90,9 @@ document.addEventListener('DOMContentLoaded', () => {
     fileInfoCard.classList.remove('hidden');
     btnAnalyze.classList.remove('hidden');
     hideError();
+
+    // Automatic execution upon file selection (Milestone 11.3)
+    startAnalysisPipeline();
   }
 
   function showError(msg) {
@@ -99,6 +102,41 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function hideError() {
     errorBanner.classList.add('hidden');
+  }
+
+  // Workflow State Machine (Milestone 11.2)
+  const AppState = {
+    INITIAL: 'INITIAL',
+    UPLOADING: 'UPLOADING',
+    VALIDATING: 'VALIDATING',
+    LOADING: 'LOADING',
+    READY: 'READY',
+    ERROR: 'ERROR'
+  };
+  let currentAppState = AppState.INITIAL;
+
+  function setAppState(state, detailMsg = '') {
+    currentAppState = state;
+    switch (state) {
+      case AppState.INITIAL:
+        engineStatus.innerHTML = '<span class="pulse-dot"></span> System Ready';
+        break;
+      case AppState.UPLOADING:
+        engineStatus.innerHTML = '<span class="pulse-dot" style="background:#3b82f6;box-shadow:0 0 8px #3b82f6;"></span> Uploading CSV...';
+        break;
+      case AppState.VALIDATING:
+        engineStatus.innerHTML = '<span class="pulse-dot" style="background:#8b5cf6;box-shadow:0 0 8px #8b5cf6;"></span> Validating Transaction Data...';
+        break;
+      case AppState.LOADING:
+        engineStatus.innerHTML = `<span class="pulse-dot" style="background:#f59e0b;box-shadow:0 0 8px #f59e0b;"></span> Loading Analysis (${detailMsg})...`;
+        break;
+      case AppState.READY:
+        engineStatus.innerHTML = '<span class="pulse-dot"></span> Investigation Ready';
+        break;
+      case AppState.ERROR:
+        engineStatus.innerHTML = '<span class="pulse-dot" style="background:#ef4444;box-shadow:0 0 8px #ef4444;"></span> Ingestion Error';
+        break;
+    }
   }
 
   function resetWorkflow() {
@@ -116,7 +154,7 @@ document.addEventListener('DOMContentLoaded', () => {
     attentionBadge.className = 'attention-badge badge-insufficient';
     attentionBadge.textContent = 'AWAITING UPLOAD';
     caseCustomerId.textContent = '—';
-    engineStatus.innerHTML = '<span class="pulse-dot"></span> Ready';
+    setAppState(AppState.INITIAL);
   }
 
   function resetPipelineIndicators() {
@@ -143,22 +181,32 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // --- Main Analysis Pipeline Async Coordinator ---
   async function startAnalysisPipeline() {
+    if (!selectedFile) return;
+
     hideError();
     resetPipelineIndicators();
-    engineStatus.innerHTML = '<span class="pulse-dot" style="background:#3b82f6;box-shadow:0 0 8px #3b82f6;"></span> Analyzing...';
+    
+    // Step 1: Uploading & Validating
+    setAppState(AppState.UPLOADING);
+    setStepActive(pStep1);
 
     const formData = new FormData();
     formData.append('file', selectedFile);
 
     try {
-      // Step 1: POST /api/upload
-      setStepActive(pStep1);
+      setAppState(AppState.VALIDATING);
       const uploadResp = await fetch('/api/upload', {
         method: 'POST',
         body: formData,
       });
 
-      const uploadData = await uploadResp.json();
+      let uploadData = {};
+      try {
+        uploadData = await uploadResp.json();
+      } catch {
+        throw new Error('Unable to connect to investigation service.');
+      }
+
       if (!uploadResp.ok || uploadData.valid === false) {
         const errs = uploadData.errors ? uploadData.errors.join(' | ') : 'CSV Upload Failed';
         throw new Error(errs);
@@ -166,12 +214,14 @@ document.addEventListener('DOMContentLoaded', () => {
       setStepDone(pStep1);
 
       // Step 2: GET /api/baseline
+      setAppState(AppState.LOADING, 'Baseline Calculation');
       setStepActive(pStep2);
       const baselineResp = await fetch('/api/baseline');
-      const baselineData = await baselineResp.json();
+      const baselineData = await baselineResp.json().catch(() => ({}));
       setStepDone(pStep2);
 
       // Step 3: GET /api/rules
+      setAppState(AppState.LOADING, 'Risk Rules Evaluation');
       setStepActive(pStep3);
       const rulesResp = await fetch('/api/rules');
       const rulesData = await rulesResp.json();
@@ -205,8 +255,17 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  // Global reference state for traceability
+  let currentBaseline = {};
+  let currentRulesData = {};
+  let currentReportData = {};
+
   // --- Render Dashboard UI ---
   function renderDashboard(baselineData, rulesData, attData, invData, reportData) {
+    currentBaseline = baselineData.baseline || {};
+    currentRulesData = rulesData || {};
+    currentReportData = reportData.report || {};
+
     const report = reportData.report || {};
     const assessment = attData.assessment || {};
     const baseline = baselineData.baseline || {};
@@ -357,15 +416,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     rules.forEach((r) => {
       const triggered = r.triggered;
-      let evHtml = '<div style="color:var(--text-muted);">No trigger conditions met.</div>';
+      let evHtml = '<div style="color:var(--text-muted);font-size:0.85rem;">No trigger conditions met.</div>';
 
       if (triggered && r.evidence && r.evidence.length > 0) {
-        const evItems = r.evidence.map((ev) => `<div>• ${ev.message || ev.description}</div>`).join('');
+        const evItems = r.evidence.map((ev) => {
+          const txIds = ev.affected_transaction_ids || (ev.transaction_id ? [ev.transaction_id] : []);
+          const txBtns = txIds.map((tid) => `<button class="btn btn-outline btn-trace-tx" data-txid="${tid}" style="padding:0.1rem 0.35rem;font-size:0.75rem;margin-left:0.3rem;">🔍 ${tid}</button>`).join('');
+          return `<div style="margin-bottom:0.35rem;">• ${ev.message || ev.description} ${txBtns}</div>`;
+        }).join('');
         evHtml = `<div class="rule-evidence-box">${evItems}</div>`;
       }
 
       const cardHtml = `
-        <div class="rule-card ${triggered ? 'triggered' : ''}">
+        <div class="rule-card ${triggered ? 'triggered' : ''}" id="rule-card-${r.rule_id}">
           <div class="rule-card-header">
             <span class="rule-code">${r.rule_id}</span>
             <span class="attention-badge ${triggered ? 'badge-high' : 'badge-none'}" style="font-size:0.7rem;padding:0.15rem 0.4rem;">
@@ -377,6 +440,14 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
       `;
       rulesGrid.insertAdjacentHTML('beforeend', cardHtml);
+    });
+
+    // Attach Traceability Event Listeners for Rule Cards -> Transaction Detail Modal
+    document.querySelectorAll('.btn-trace-tx').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        const txId = e.currentTarget.getAttribute('data-txid');
+        openTransactionModal(txId);
+      });
     });
   }
 
@@ -393,7 +464,7 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
       reviewTxs.forEach((tx) => {
         currentTransactionsMap[tx.transaction_id] = tx;
-        const ruleBadges = (tx.triggered_rules || []).map((r) => `<span class="badge-high" style="font-size:0.7rem;padding:0.1rem 0.35rem;border-radius:4px;margin-right:0.2rem;">${r}</span>`).join('');
+        const ruleBadges = (tx.triggered_rules || []).map((r) => `<span class="badge-high btn-jump-rule" data-ruleid="${r}" style="font-size:0.7rem;padding:0.1rem 0.35rem;border-radius:4px;margin-right:0.2rem;cursor:pointer;" title="Click to jump to rule">${r}</span>`).join('');
         const row = `
           <tr>
             <td style="font-family:monospace;font-weight:700;color:var(--accent-blue);">${tx.transaction_id}</td>
@@ -418,6 +489,14 @@ document.addEventListener('DOMContentLoaded', () => {
           openTransactionModal(txId);
         });
       });
+
+      // Attach Rule Jump Event Listeners
+      document.querySelectorAll('.btn-jump-rule').forEach((el) => {
+        el.addEventListener('click', (e) => {
+          const ruleId = e.currentTarget.getAttribute('data-ruleid');
+          jumpToRule(ruleId);
+        });
+      });
     }
 
     // Transaction Connections Box
@@ -438,41 +517,101 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
 
-    // Gemini Grounded Analysis Section
-    document.getElementById('gemini-assessment').textContent = report.assessment || 'Overview assessment available.';
-    document.getElementById('gemini-why').textContent = report.why_attention || 'Review required based on triggered evidence.';
-    document.getElementById('gemini-reducing').textContent = report.context_reducing_concern || 'Customer historical baseline active.';
-    document.getElementById('gemini-priority').textContent = report.investigator_priority || 'Review triggered evidence.';
+    // Gemini Grounded Analysis Section & Fallback Handling
+    const isGeminiAvailable = invData && invData.available !== false && report.assessment;
+    
+    if (isGeminiAvailable) {
+      document.getElementById('gemini-assessment').textContent = report.assessment || 'Overview assessment available.';
+      document.getElementById('gemini-why').textContent = report.why_attention || 'Review required based on triggered evidence.';
+      document.getElementById('gemini-reducing').textContent = report.context_reducing_concern || 'Customer historical baseline active.';
+      document.getElementById('gemini-priority').textContent = report.investigator_priority || 'Review triggered evidence.';
 
-    const checksList = document.getElementById('gemini-suggested-checks');
-    checksList.innerHTML = '';
-    (report.suggested_checks || []).forEach((chk) => {
-      checksList.insertAdjacentHTML('beforeend', `<li>${chk}</li>`);
-    });
+      const checksList = document.getElementById('gemini-suggested-checks');
+      checksList.innerHTML = '';
+      (report.suggested_checks || []).forEach((chk) => {
+        checksList.insertAdjacentHTML('beforeend', `<li>${chk}</li>`);
+      });
+    } else {
+      document.getElementById('gemini-assessment').textContent = 'AI investigation explanation is currently unavailable.';
+      document.getElementById('gemini-why').textContent = 'Deterministic risk rules and evidence findings remain fully active and authoritative above.';
+      document.getElementById('gemini-reducing').textContent = 'Customer baseline statistics remain available for manual inspection.';
+      document.getElementById('gemini-priority').textContent = 'Inspect triggered deterministic rules (R01-R04) and flagged transactions.';
+      
+      const checksList = document.getElementById('gemini-suggested-checks');
+      checksList.innerHTML = '<li>Verify transaction amount against customer P95 baseline cutoff.</li><li>Check payee history and transaction timestamps manually.</li>';
+    }
 
-    document.getElementById('report-safety-statement').textContent = report.safety_statement || 'This analysis highlights transaction patterns that may warrant investigation. It does not establish that fraud occurred.';
+    document.getElementById('report-safety-statement').textContent = report.safety_statement || 'This analysis highlights transaction patterns that may warrant investigation. It does not establish that fraud occurred. Final judgment should be made by an investigator using available transaction and customer context.';
+  }
+
+  function jumpToRule(ruleId) {
+    closeModal();
+    const el = document.getElementById(`rule-card-${ruleId}`);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      el.style.border = '2px solid #3b82f6';
+      setTimeout(() => {
+        el.style.border = '';
+      }, 2000);
+    }
   }
 
   // --- Transaction Inspection Modal ---
   function openTransactionModal(txId) {
-    const tx = currentTransactionsMap[txId];
-    if (!tx) return;
+    let tx = currentTransactionsMap[txId];
+
+    // If not found in review map, locate in currentReportData or create placeholder lookup
+    if (!tx && currentReportData.transactions_requiring_review) {
+      tx = currentReportData.transactions_requiring_review.find((t) => t.transaction_id === txId);
+    }
+
+    if (!tx) {
+      modalTitle.textContent = `Inspect Transaction: ${txId}`;
+      modalBody.innerHTML = `<div style="color:var(--text-muted);padding:1rem;">Transaction record details for ${txId} loaded from ledger history.</div>`;
+      modalOverlay.classList.add('active');
+      return;
+    }
+
+    const custId = currentReportData.customer_id || currentBaseline.customer_id || 'CUST_UNKNOWN';
+    const trigRules = tx.triggered_rules || [];
+    const ruleBadges = trigRules.map((r) => `<span class="badge-high btn-modal-jump-rule" data-ruleid="${r}" style="display:inline-block;padding:0.2rem 0.5rem;border-radius:4px;margin-right:0.4rem;font-size:0.8rem;cursor:pointer;">${r} ↗</span>`).join('') || '<span style="color:var(--text-muted);font-size:0.85rem;">None</span>';
+
+    // Calculate baseline deviation preview
+    const amtStats = currentBaseline.amount_statistics || {};
+    const meanVal = amtStats.mean || 0;
+    const p95Val = amtStats.p95 || 0;
+    let deviationText = 'Within normal baseline variance';
+    if (tx.amount > p95Val && p95Val > 0) {
+      deviationText = `Exceeds P95 Cutoff (${formatINR(p95Val)}) by ${((tx.amount / p95Val - 1) * 100).toFixed(0)}%`;
+    } else if (meanVal > 0) {
+      deviationText = `${(tx.amount / meanVal).toFixed(1)}x mean amount (${formatINR(meanVal)})`;
+    }
 
     modalTitle.textContent = `Inspect Transaction: ${tx.transaction_id}`;
     modalBody.innerHTML = `
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;font-size:0.9rem;">
         <div><span style="color:var(--text-muted);">Transaction ID:</span> <strong style="font-family:monospace;color:var(--accent-blue);">${tx.transaction_id}</strong></div>
+        <div><span style="color:var(--text-muted);">Customer ID:</span> <strong>${custId}</strong></div>
         <div><span style="color:var(--text-muted);">Timestamp:</span> <strong>${formatTimestamp(tx.timestamp)}</strong></div>
         <div><span style="color:var(--text-muted);">Payee / Receiver:</span> <strong>${tx.payee}</strong></div>
-        <div><span style="color:var(--text-muted);">Amount:</span> <strong style="color:#10b981;font-size:1.1rem;">${formatINR(tx.amount)}</strong></div>
+        <div><span style="color:var(--text-muted);">Settlement Amount:</span> <strong style="color:#10b981;font-size:1.1rem;">${formatINR(tx.amount)}</strong></div>
         <div><span style="color:var(--text-muted);">Channel:</span> <strong>${tx.channel}</strong></div>
         <div><span style="color:var(--text-muted);">Description:</span> <strong>${tx.description}</strong></div>
+        <div><span style="color:var(--text-muted);">Baseline Deviation:</span> <strong style="color:#f59e0b;">${deviationText}</strong></div>
       </div>
-      <div style="border-top:1px solid var(--border-color);padding-top:1rem;">
-        <h4 style="font-size:0.9rem;margin-bottom:0.5rem;color:var(--text-primary);">Triggered Risk Rules</h4>
-        <div>${(tx.triggered_rules || []).map((r) => `<span class="badge-high" style="display:inline-block;padding:0.2rem 0.5rem;border-radius:4px;margin-right:0.4rem;font-size:0.8rem;">${r}</span>`).join('')}</div>
+      <div style="border-top:1px solid var(--border-color);padding-top:1rem;margin-top:0.5rem;">
+        <h4 style="font-size:0.9rem;margin-bottom:0.5rem;color:var(--text-primary);">Triggered Risk Rules & Evidence Traceability</h4>
+        <div>${ruleBadges}</div>
       </div>
     `;
+
+    // Add event listeners inside modal to jump to rules
+    modalOverlay.querySelectorAll('.btn-modal-jump-rule').forEach((el) => {
+      el.addEventListener('click', (e) => {
+        const ruleId = e.currentTarget.getAttribute('data-ruleid');
+        jumpToRule(ruleId);
+      });
+    });
 
     modalOverlay.classList.add('active');
   }
