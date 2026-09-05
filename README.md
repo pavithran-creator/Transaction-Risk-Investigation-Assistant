@@ -15,9 +15,11 @@ Financial institutions encounter complex challenges when attempting to detect fi
 > **Phase 7:** Grounded Gemini Investigation Explanation Engine — ✅ Complete  
 > **Phase 8:** Structured Investigation Report Generation Engine — ✅ Complete  
 > **Phase 9:** Grounded Evidence Retrieval Engine — ✅ Complete  
+> **Phase 10 & 11:** Investigation Dashboard Frontend & End-to-End API Integration — ✅ Complete  
 
 The project currently provides:
 - A FastAPI backend server with health-check endpoint (`GET /`).
+- Single-page enterprise compliance dashboard hosted at `/` or `/dashboard`.
 - A CSV upload endpoint (`POST /api/upload`) that accepts, validates, and loads transaction CSV files.
 - Single-customer transaction history enforcement (`MULTIPLE_CUSTOMERS_NOT_ALLOWED`).
 - Pydantic domain models (`Transaction`, `TransactionDataset`, `CustomerBaseline`, `RuleResult`, `CustomerAttentionAssessment`, `InvestigationExplanation`, `InvestigationReport`, `EvidenceDocument`, etc.).
@@ -29,6 +31,7 @@ The project currently provides:
 - Grounded Gemini investigation explanation endpoint (`GET /api/investigation`) providing natural-language investigator explanations strictly derived from deterministic evidence.
 - Structured investigation report endpoint (`GET /api/report`) generating comprehensive, traceable investigation reports for compliance teams.
 - Grounded evidence retrieval engine (`EvidenceRetrievalService`) leveraging `gemini-embedding-001` and an in-memory `LocalEvidenceIndex` using cosine similarity.
+- End-to-end frontend integration with real-time pipeline status, bidirectional evidence traceability, detail inspection modal, and robust edge-state handling.
 
 ## Grounded Evidence Retrieval (Phase 9)
 
