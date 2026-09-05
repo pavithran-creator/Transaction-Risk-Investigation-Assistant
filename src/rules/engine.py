@@ -14,6 +14,7 @@ from src.rules.r01_unusually_large_transfer import evaluate_r01_unusually_large_
 from src.rules.r02_burst_to_new_payee import evaluate_r02_burst_to_new_payee
 from src.rules.r03_odd_hours_activity import evaluate_r03_odd_hours_activity
 from src.rules.r04_pattern_deviation import evaluate_r04_established_pattern_deviation
+from src.rules.config import R01_AMOUNT_MULTIPLIER
 
 
 def evaluate_all_rules(
@@ -49,7 +50,7 @@ def evaluate_all_rules(
         eval_txs = sorted_txs
 
     # Evaluate each rule independently against target evaluation transactions
-    r01 = evaluate_r01_unusually_large_transfer(eval_txs, baseline)
+    r01 = evaluate_r01_unusually_large_transfer(eval_txs, baseline, multiplier=R01_AMOUNT_MULTIPLIER)
     r02 = evaluate_r02_burst_to_new_payee(eval_txs, baseline)
     r03 = evaluate_r03_odd_hours_activity(eval_txs, baseline)
     r04 = evaluate_r04_established_pattern_deviation(eval_txs, baseline)

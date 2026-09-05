@@ -7,6 +7,7 @@ temporal activity, and daily transaction frequency.
 
 from collections import defaultdict
 from typing import Dict, List, Optional
+import math
 import numpy as np
 
 from src.models.baseline import (
@@ -32,7 +33,7 @@ def calculate_amount_statistics(amounts: List[float]) -> Optional[AmountStatisti
     if not amounts:
         return None
 
-    clean_amounts = [float(a) for a in amounts if a is not None]
+    clean_amounts = [float(a) for a in amounts if a is not None and math.isfinite(float(a))]
     if not clean_amounts:
         return None
 

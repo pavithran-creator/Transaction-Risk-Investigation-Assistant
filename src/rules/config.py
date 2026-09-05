@@ -7,6 +7,7 @@ to ensure maintainability, determinism, and clear documentation.
 
 # R01: Unusually Large Transfer Configuration
 R01_AMOUNT_PERCENTILE_KEY = "p95"  # Compare transaction amount against customer P95 baseline
+R01_AMOUNT_MULTIPLIER = 1.2  # Require a material exceedance above P95 to avoid normal variation
 
 # R02: Burst to a Newly Added Payee Configuration
 R02_BURST_WINDOW_HOURS = 24  # Time window (in hours) to evaluate payee transaction concentration

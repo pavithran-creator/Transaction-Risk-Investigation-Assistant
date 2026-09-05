@@ -6,6 +6,7 @@ TRACK_ID=PS06
 Financial institutions encounter complex challenges when attempting to detect financial risk, identify fraudulent transaction patterns, and investigate suspicious banking activities. The PS06 Banking Transaction Risk Investigation Assistant is designed to provide an automated, intelligence-assisted platform for risk assessment and transaction analysis to assist financial compliance and fraud investigation teams.
 
 ## Current Implementation Status
+> **Backend implementation:** ✅ Complete — API, CSV validation and loading, customer baseline analysis, R01–R04 risk rules, attention assessment, grounded investigation explanations, evidence retrieval, and structured reporting are implemented and validated.
 > **Phase 1:** Initial FastAPI foundation — ✅ Complete  
 > **Phase 2:** CSV upload and transaction validation — ✅ Complete  
 > **Phase 3:** Transaction loading, single-customer validation & in-memory dataset structure — ✅ Complete  
